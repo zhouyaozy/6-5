@@ -20,6 +20,7 @@ package org.apache.commons.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,13 +30,35 @@ import org.junit.jupiter.api.Test;
 class AlreadySelectedExceptionTest {
 
     @Test
-    void testConstructor() {
-        assertEquals("a", new AlreadySelectedException("a").getMessage());
-        assertNull(new AlreadySelectedException("a").getOption());
+    void testConstructorWithString() {
+        final AlreadySelectedException e = new AlreadySelectedException("a");
+        assertEquals("a", e.getMessage());
+        assertNull(e.getOption());
+        assertNull(e.getOptionGroup());
+    }
+
+    @Test
+    void testConstructorWithOptionGroupAndOption() {
         final Option option = new Option("a", "d");
         final OptionGroup optionGroup = new OptionGroup();
-        assertNotNull(new AlreadySelectedException(optionGroup, option).getMessage());
-        assertEquals(option, new AlreadySelectedException(optionGroup, option).getOption());
-        assertEquals(optionGroup, new AlreadySelectedException(optionGroup, option).getOptionGroup());
+        optionGroup.addOption(option);
+        final AlreadySelectedException e = new AlreadySelectedException(optionGroup, option);
+        assertNotNull(e.getMessage());
+        assertEquals(option, e.getOption());
+        assertEquals(optionGroup, e.getOptionGroup());
+    }
+
+    @Test
+    void testMessageFormatWithOptionGroupAndOption() throws AlreadySelectedException {
+        final Option optionA = new Option("a", "desc-a");
+        final Option optionB = new Option("b", "desc-b");
+        final OptionGroup optionGroup = new OptionGroup();
+        optionGroup.addOption(optionA);
+        optionGroup.addOption(optionB);
+        optionGroup.setSelected(optionA);
+        final AlreadySelectedException e = new AlreadySelectedException(optionGroup, optionB);
+        final String message = e.getMessage();
+        assertTrue(message.contains("'b'"), "Message should contain the triggering option 'b'");
+        assertTrue(message.contains("'a'"), "Message should contain the already selected option 'a'");
     }
 }
