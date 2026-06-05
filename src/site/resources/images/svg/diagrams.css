@@ -41,6 +41,11 @@
 	stroke: none;
 }
 
+text {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+}
+
 text.title {
 	text-anchor: middle;
 }
@@ -57,7 +62,7 @@ rect, line, polygon, polyline {
 
 .implements, .extends {
 	fill: none;
-	marker-end: url(util.svg#HollowArrow); 
+	marker-end: url("util.svg#HollowArrow");
 }
 
 .implements, .note.connect {

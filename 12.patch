@@ -1,0 +1,189 @@
+diff --git a/src/site/resources/images/svg/diagrams-cli2.js b/src/site/resources/images/svg/diagrams-cli2.js
+index 38efec58..565c685b 100644
+--- a/src/site/resources/images/svg/diagrams-cli2.js
++++ b/src/site/resources/images/svg/diagrams-cli2.js
+@@ -168,17 +168,6 @@ DefaultOptionBuilder.addAttribute("shortPrefix");
+ DefaultOptionBuilder.addAttribute("longPrefix");
+ DefaultOptionBuilder.addAttribute("burstEnabled");
+ 
+-var DefaultOptionBuilder = new Class("DefaultOptionBuilder");
+-DefaultOptionBuilder.addMethod("withId(...)");
+-DefaultOptionBuilder.addMethod("withShortName(...)");
+-DefaultOptionBuilder.addMethod("withLongName(...)");
+-DefaultOptionBuilder.addMethod("withDescription(...)");
+-DefaultOptionBuilder.addMethod("withArgument(...)");
+-DefaultOptionBuilder.addMethod("withChildren(...)");
+-DefaultOptionBuilder.addMethod("withRequired(...)");
+-DefaultOptionBuilder.addMethod("create()");
+-DefaultOptionBuilder.addMethod("reset()");
+-
+ var GroupBuilder = new Class("GroupBuilder");
+ GroupBuilder.addMethod("withName(...)");
+ GroupBuilder.addMethod("withDescription(...)");
+@@ -234,10 +223,10 @@ FileValidator.addAttribute("hidden");
+ FileValidator.addAttribute("readable");
+ FileValidator.addAttribute("writable");
+ 
+-var FileValidator = new Class("FileValidator");
+-FileValidator.addAttribute("format");
+-FileValidator.addAttribute("minimum");
+-FileValidator.addAttribute("maximum");
++var NumberValidator = new Class("NumberValidator");
++NumberValidator.addAttribute("format");
++NumberValidator.addAttribute("minimum");
++NumberValidator.addAttribute("maximum");
+ 
+ var UrlValidator = new Class("UrlValidator");
+ UrlValidator.addAttribute("format");
+diff --git a/src/site/resources/images/svg/diagrams.css b/src/site/resources/images/svg/diagrams.css
+index fc1426fb..773e7714 100644
+--- a/src/site/resources/images/svg/diagrams.css
++++ b/src/site/resources/images/svg/diagrams.css
+@@ -41,6 +41,11 @@
+ 	stroke: none;
+ }
+ 
++text {
++	font-family: Arial, Helvetica, sans-serif;
++	font-size: 10px;
++}
++
+ text.title {
+ 	text-anchor: middle;
+ }
+@@ -57,7 +62,7 @@ rect, line, polygon, polyline {
+ 
+ .implements, .extends {
+ 	fill: none;
+-	marker-end: url(util.svg#HollowArrow); 
++	marker-end: url("util.svg#HollowArrow");
+ }
+ 
+ .implements, .note.connect {
+diff --git a/src/site/site.xml b/src/site/site.xml
+index 0d8b667e..9f95bfa8 100644
+--- a/src/site/site.xml
++++ b/src/site/site.xml
+@@ -34,6 +34,7 @@
+       <item name="Dependency Management" href="/dependency-info.html" />
+       <item name="Sources" href="/scm.html" />
+       <item name="Security" href="security.html" />
++      <item name="Site Deployment" href="deployment.html" />
+       <item name="License" href="https://www.apache.org/licenses/LICENSE-2.0" />
+       <item name="Code of Conduct" href="https://www.apache.org/foundation/policies/conduct.html" />
+       <item name="Download" href="https://commons.apache.org/proper/commons-cli/download_cli.cgi" />
+diff --git a/src/site/xdoc/deployment.xml b/src/site/xdoc/deployment.xml
+new file mode 100644
+index 00000000..e3247ca4
+--- /dev/null
++++ b/src/site/xdoc/deployment.xml
+@@ -0,0 +1,109 @@
++<?xml version="1.0"?>
++<!--
++ Licensed to the Apache Software Foundation (ASF) under one
++ or more contributor license agreements.  See the NOTICE file
++ distributed with this work for additional information
++ regarding copyright ownership.  The ASF licenses this file
++ to you under the Apache License, Version 2.0 (the
++ "License"); you may not use this file except in compliance
++ with the License.  You may obtain a copy of the License at
++
++   https://www.apache.org/licenses/LICENSE-2.0
++
++ Unless required by applicable law or agreed to in writing,
++ software distributed under the License is distributed on an
++ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ KIND, either express or implied.  See the License for the
++ specific language governing permissions and limitations
++ under the License.
++-->
++<document xmlns="http://maven.apache.org/XDOC/2.0"
++  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
++  <properties>
++    <title>Project Site Deployment</title>
++    <author email="dev@commons.apache.org">Apache Commons Team</author>
++  </properties>
++  <body>
++    <section name="Overview">
++      <p>
++        This page describes how to build, validate and publish the Apache Commons CLI project site.
++        The site is generated with Maven Site and deployed to the Apache Commons web infrastructure
++        defined in the project <code>pom.xml</code>.
++      </p>
++      <p>
++        Static SVG assets under <code>src/site/resources/images/svg</code> are deployed together with the rest of the site.
++        In particular, <code>diagrams-cli2.js</code> and <code>diagrams.css</code> are part of the published output used by
++        <a href="resources/images/svg/options.svg">options.svg</a> and
++        <a href="resources/images/svg/commandlines.svg">commandlines.svg</a>.
++      </p>
++    </section>
++
++    <section name="Prerequisites">
++      <ul>
++        <li>A JDK version compatible with the <code>maven.compiler.source</code> property in the project <code>pom.xml</code>.</li>
++        <li>Apache Maven installed and available on the command line.</li>
++        <li>Subversion command line tooling available as <code>svn</code>.</li>
++        <li>Apache committer credentials configured for the <code>apache.website</code> server entry in Maven settings.</li>
++      </ul>
++      <p>
++        On a fresh machine, the build automatically prepares a local <code>site-content</code> working copy before site publication.
++      </p>
++    </section>
++
++    <section name="Build and Validate Locally">
++      <p>Generate the site locally before publishing any change:</p>
++      <source>
++mvn clean site
++      </source>
++      <p>
++        Review the generated output in <code>target/site</code>. The deployment page generated from this source is
++        <code>target/site/deployment.html</code>.
++      </p>
++      <p>Validate the site-specific SVG assets as part of the review:</p>
++      <ul>
++        <li><code>target/site/resources/images/svg/options.svg</code></li>
++        <li><code>target/site/resources/images/svg/commandlines.svg</code></li>
++        <li><code>target/site/resources/images/svg/diagrams-cli2.js</code></li>
++        <li><code>target/site/resources/images/svg/diagrams.css</code></li>
++      </ul>
++      <p>
++        Open the generated SVG files directly in a browser when you want to confirm that the diagrams render with their script and stylesheet dependencies.
++      </p>
++    </section>
++
++    <section name="Publish the Project Site">
++      <p>
++        Commons CLI is a single-module project and publishes its site using the distribution management site URL configured in the project <code>pom.xml</code>.
++      </p>
++      <source>
++mvn site-deploy
++      </source>
++      <p>
++        The deployment target is the Apache Commons production site location for Commons CLI. During publication,
++        the local <code>site-content</code> checkout is updated and the generated site content is synchronized into it.
++      </p>
++      <p>
++        The current configuration preserves previously published Javadocs by excluding <code>javadocs**</code> from automatic deletion.
++      </p>
++    </section>
++
++    <section name="Release Candidate Site">
++      <p>
++        To publish the release candidate site to the versioned staging location defined by the <code>rc</code> Maven profile, run:
++      </p>
++      <source>
++mvn -Prc site-deploy
++      </source>
++    </section>
++
++    <section name="Deployment Checklist">
++      <ul>
++        <li>Run <code>mvn clean site</code>.</li>
++        <li>Review <code>target/site/deployment.html</code> and the generated SVG assets.</li>
++        <li>Confirm that navigation includes the deployment page.</li>
++        <li>Run <code>mvn site-deploy</code> for production or <code>mvn -Prc site-deploy</code> for release candidate staging.</li>
++      </ul>
++    </section>
++  </body>
++</document>
