@@ -1,0 +1,45 @@
+diff --git a/src/site/resources/images/svg/diagrams-cli2.js b/src/site/resources/images/svg/diagrams-cli2.js
+index 38efec58..6b7cd945 100644
+--- a/src/site/resources/images/svg/diagrams-cli2.js
++++ b/src/site/resources/images/svg/diagrams-cli2.js
+@@ -234,10 +234,14 @@ FileValidator.addAttribute("hidden");
+ FileValidator.addAttribute("readable");
+ FileValidator.addAttribute("writable");
+ 
+-var FileValidator = new Class("FileValidator");
+-FileValidator.addAttribute("format");
+-FileValidator.addAttribute("minimum");
+-FileValidator.addAttribute("maximum");
++var NumberValidator = new Class("NumberValidator");
++NumberValidator.addAttribute("format");
++NumberValidator.addAttribute("minimum");
++NumberValidator.addAttribute("maximum");
++
++var PatternValidator = new Class("PatternValidator");
++PatternValidator.addAttribute("pattern");
++PatternValidator.addAttribute("flags");
+ 
+ var UrlValidator = new Class("UrlValidator");
+ UrlValidator.addAttribute("format");
+diff --git a/src/site/resources/images/svg/diagrams.css b/src/site/resources/images/svg/diagrams.css
+index fc1426fb..96e83669 100644
+--- a/src/site/resources/images/svg/diagrams.css
++++ b/src/site/resources/images/svg/diagrams.css
+@@ -32,6 +32,17 @@
+ 	fill:rgb(255,191,255);
+ }
+ 
++.Validator .outline, .Validator polygon.note,
++.ClassValidator .outline, .ClassValidator polygon.note,
++.DateValidator .outline, .DateValidator polygon.note,
++.EnumValidator .outline, .EnumValidator polygon.note,
++.FileValidator .outline, .FileValidator polygon.note,
++.NumberValidator .outline, .NumberValidator polygon.note,
++.PatternValidator .outline, .PatternValidator polygon.note,
++.UrlValidator .outline, .UrlValidator polygon.note {
++	fill:rgb(255,223,191);
++}
++
+ .package rect {
+ 	fill:rgb(255,255,191);
+ }

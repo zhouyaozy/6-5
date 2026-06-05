@@ -32,6 +32,17 @@
 	fill:rgb(255,191,255);
 }
 
+.Validator .outline, .Validator polygon.note,
+.ClassValidator .outline, .ClassValidator polygon.note,
+.DateValidator .outline, .DateValidator polygon.note,
+.EnumValidator .outline, .EnumValidator polygon.note,
+.FileValidator .outline, .FileValidator polygon.note,
+.NumberValidator .outline, .NumberValidator polygon.note,
+.PatternValidator .outline, .PatternValidator polygon.note,
+.UrlValidator .outline, .UrlValidator polygon.note {
+	fill:rgb(255,223,191);
+}
+
 .package rect {
 	fill:rgb(255,255,191);
 }

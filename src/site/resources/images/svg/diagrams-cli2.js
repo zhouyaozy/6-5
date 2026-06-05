@@ -234,10 +234,14 @@ FileValidator.addAttribute("hidden");
 FileValidator.addAttribute("readable");
 FileValidator.addAttribute("writable");
 
-var FileValidator = new Class("FileValidator");
-FileValidator.addAttribute("format");
-FileValidator.addAttribute("minimum");
-FileValidator.addAttribute("maximum");
+var NumberValidator = new Class("NumberValidator");
+NumberValidator.addAttribute("format");
+NumberValidator.addAttribute("minimum");
+NumberValidator.addAttribute("maximum");
+
+var PatternValidator = new Class("PatternValidator");
+PatternValidator.addAttribute("pattern");
+PatternValidator.addAttribute("flags");
 
 var UrlValidator = new Class("UrlValidator");
 UrlValidator.addAttribute("format");
