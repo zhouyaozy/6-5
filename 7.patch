@@ -1,0 +1,109 @@
+diff --git a/src/main/java/org/apache/commons/cli/AlreadySelectedException.java b/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
+index 7603eac5..b564e809 100644
+--- a/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
++++ b/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
+@@ -31,18 +31,18 @@ public class AlreadySelectedException extends ParseException {
+     private final OptionGroup optionGroup;
+ 
+     /** The option that triggered the exception. */
+-    private final Option option;
++    private final Option triggeringOption;
+ 
+     /**
+      * Constructs a new {@code AlreadySelectedException} for the specified option group.
+      *
+      * @param optionGroup the option group already selected.
+-     * @param option the option that triggered the exception.
++     * @param triggeringOption the option that triggered the exception.
+      * @since 1.2
+      */
+-    public AlreadySelectedException(final OptionGroup optionGroup, final Option option) {
+-        this(String.format("The option '%s' was specified but an option from this group has already been selected: '%s'", option.getKey(),
+-                optionGroup.getSelected()), optionGroup, option);
++    public AlreadySelectedException(final OptionGroup optionGroup, final Option triggeringOption) {
++        this(String.format("The option '%s' was specified but an option from this group has already been selected: '%s'", triggeringOption.getKey(),
++                optionGroup.getSelected()), optionGroup, triggeringOption);
+     }
+ 
+     /**
+@@ -54,10 +54,10 @@ public class AlreadySelectedException extends ParseException {
+         this(message, null, null);
+     }
+ 
+-    private AlreadySelectedException(final String message, final OptionGroup optionGroup, final Option option) {
++    private AlreadySelectedException(final String message, final OptionGroup optionGroup, final Option triggeringOption) {
+         super(message);
+         this.optionGroup = optionGroup;
+-        this.option = option;
++        this.triggeringOption = triggeringOption;
+     }
+ 
+     /**
+@@ -67,7 +67,7 @@ public class AlreadySelectedException extends ParseException {
+      * @since 1.2
+      */
+     public Option getOption() {
+-        return option;
++        return triggeringOption;
+     }
+ 
+     /**
+diff --git a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+index 86cefd19..e91c8bba 100644
+--- a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
++++ b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+@@ -35,25 +35,25 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
+     /**
+      * Build the exception message from the specified list of options.
+      *
+-     * @param option
++     * @param partialOption
+      * @param matchingOptions
+      * @return
+      */
+-    private static String createMessage(final String option, final Collection<String> matchingOptions) {
+-        final StringBuilder buf = new StringBuilder("Ambiguous option: '");
+-        buf.append(option);
+-        buf.append("'  (could be: ");
+-        final Iterator<String> it = matchingOptions.iterator();
+-        while (it.hasNext()) {
+-            buf.append(Char.APOS);
+-            buf.append(it.next());
+-            buf.append(Char.APOS);
+-            if (it.hasNext()) {
+-                buf.append(", ");
++    private static String createMessage(final String partialOption, final Collection<String> matchingOptions) {
++        final StringBuilder messageBuilder = new StringBuilder("Ambiguous option: '");
++        messageBuilder.append(partialOption);
++        messageBuilder.append("'  (could be: ");
++        final Iterator<String> matchingOptionsIterator = matchingOptions.iterator();
++        while (matchingOptionsIterator.hasNext()) {
++            messageBuilder.append(Char.APOS);
++            messageBuilder.append(matchingOptionsIterator.next());
++            messageBuilder.append(Char.APOS);
++            if (matchingOptionsIterator.hasNext()) {
++                messageBuilder.append(", ");
+             }
+         }
+-        buf.append(")");
+-        return buf.toString();
++        messageBuilder.append(")");
++        return messageBuilder.toString();
+     }
+ 
+     /** The list of options matching the partial name specified */
+@@ -62,11 +62,11 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
+     /**
+      * Constructs a new AmbiguousOptionException.
+      *
+-     * @param option the partial option name.
++     * @param partialOption the partial option name.
+      * @param matchingOptions the options matching the name.
+      */
+-    public AmbiguousOptionException(final String option, final Collection<String> matchingOptions) {
+-        super(createMessage(option, matchingOptions), option);
++    public AmbiguousOptionException(final String partialOption, final Collection<String> matchingOptions) {
++        super(createMessage(partialOption, matchingOptions), partialOption);
+         this.matchingOptions = matchingOptions;
+     }
+ 
