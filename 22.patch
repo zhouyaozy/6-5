@@ -1,0 +1,292 @@
+diff --git a/src/site/resources/images/svg/diagrams-cli2.js b/src/site/resources/images/svg/diagrams-cli2.js
+index 38efec58..eb07316f 100644
+--- a/src/site/resources/images/svg/diagrams-cli2.js
++++ b/src/site/resources/images/svg/diagrams-cli2.js
+@@ -289,3 +289,243 @@ HelpFormatter.addAttribute("lineUsageSettings");
+ HelpFormatter.addAttribute("pageWidth");
+ HelpFormatter.addAttribute("printWriter");
+ HelpFormatter.addAttribute("shellCommand");
++
++var requestParameterValidation = {
++	checked : false,
++	valid : true
++};
++
++function normalizeRequestParameterText(text){
++	if(text == null){
++		return "";
++	}
++	text = ("" + text).replace(/\+/g, " ");
++	try{
++		text = decodeURIComponent(text);
++	}
++	catch(err){
++	}
++	text = text.replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
++	if(text.length == 0){
++		return "(empty)";
++	}
++	if(text.length > 60){
++		return text.substring(0,57) + "...";
++	}
++	return text;
++}
++
++function formatRequestParameter(name, value, hasValue){
++	name = normalizeRequestParameterText(name);
++	if(hasValue == true){
++		return name + "=" + normalizeRequestParameterText(value);
++	}
++	return name;
++}
++
++function getRequestQueryString(){
++	var url = "";
++	var hashIndex = -1;
++	var queryIndex = -1;
++	if(typeof document != "undefined" && document.URL){
++		url = document.URL;
++	}
++	else if(typeof window != "undefined" && window.location && window.location.href){
++		url = window.location.href;
++	}
++	queryIndex = url.indexOf("?");
++	if(queryIndex < 0){
++		return "";
++	}
++	hashIndex = url.indexOf("#", queryIndex);
++	if(hashIndex < 0){
++		return url.substring(queryIndex + 1);
++	}
++	return url.substring(queryIndex + 1, hashIndex);
++}
++
++function getRequestParameters(){
++	var queryString = getRequestQueryString();
++	var parameters = new Array();
++	var tokens;
++	var token;
++	var equalsIndex;
++	var i;
++	if(queryString.length == 0){
++		return parameters;
++	}
++	tokens = queryString.split("&");
++	for(i=0;i<tokens.length;++i){
++		token = tokens[i];
++		if(token.length == 0){
++			continue;
++		}
++		equalsIndex = token.indexOf("=");
++		if(equalsIndex < 0){
++			parameters[parameters.length] = formatRequestParameter(token, "", false);
++		}
++		else{
++			parameters[parameters.length] = formatRequestParameter(token.substring(0, equalsIndex), token.substring(equalsIndex + 1), true);
++		}
++	}
++	if(parameters.length == 0){
++		parameters[0] = normalizeRequestParameterText(queryString);
++	}
++	return parameters;
++}
++
++function appendClassName(existingClassName, className){
++	if(existingClassName == null || existingClassName.length == 0){
++		return className;
++	}
++	if((" " + existingClassName + " ").indexOf(" " + className + " ") >= 0){
++		return existingClassName;
++	}
++	return existingClassName + " " + className;
++}
++
++function getRequestValidationRoot(evt){
++	if(evt != null && evt.target != null && evt.target.ownerSVGElement != null){
++		return evt.target.ownerSVGElement;
++	}
++	if(typeof document != "undefined" && document.documentElement != null){
++		return document.documentElement;
++	}
++	return null;
++}
++
++function getSvgDimension(root, attributeName, defaultValue){
++	var value;
++	if(root == null){
++		return defaultValue;
++	}
++	value = parseFloat(root.getAttributeNS(null, attributeName));
++	if(isNaN(value) || value <= 0){
++		return defaultValue;
++	}
++	return value;
++}
++
++function appendRequestValidationText(group, x, y, className, text){
++	var element = document.createElementNS(namespace, "text");
++	element.setAttributeNS(null, "x", x);
++	element.setAttributeNS(null, "y", y);
++	element.setAttributeNS(null, "class", className);
++	element.appendChild(document.createTextNode(text));
++	group.appendChild(element);
++}
++
++function renderRequestValidationMessage(root, parameters){
++	var group;
++	var background;
++	var panel;
++	var width = getSvgDimension(root, "width", 480);
++	var height = getSvgDimension(root, "height", 240);
++	var panelX = 20;
++	var panelY = 20;
++	var panelWidth = width - panelX * 2;
++	var panelHeight = height - panelY * 2;
++	var lineY = 70;
++	var i;
++	if(root == null){
++		return;
++	}
++	if(root.getAttributeNS(null, "data-request-parameter-validation") == "invalid"){
++		return;
++	}
++	root.setAttributeNS(null, "class", appendClassName(root.getAttributeNS(null, "class"), "request-invalid"));
++	root.setAttributeNS(null, "data-request-parameter-validation", "invalid");
++
++	group = document.createElementNS(namespace, "g");
++	group.setAttributeNS(null, "class", "request-validation-message");
++
++	background = document.createElementNS(namespace, "rect");
++	background.setAttributeNS(null, "x", 0);
++	background.setAttributeNS(null, "y", 0);
++	background.setAttributeNS(null, "width", width);
++	background.setAttributeNS(null, "height", height);
++	background.setAttributeNS(null, "class", "request-validation-overlay");
++	group.appendChild(background);
++
++	panel = document.createElementNS(namespace, "rect");
++	panel.setAttributeNS(null, "x", panelX);
++	panel.setAttributeNS(null, "y", panelY);
++	panel.setAttributeNS(null, "width", panelWidth);
++	panel.setAttributeNS(null, "height", panelHeight);
++	panel.setAttributeNS(null, "rx", 12);
++	panel.setAttributeNS(null, "ry", 12);
++	panel.setAttributeNS(null, "class", "request-validation-panel");
++	group.appendChild(panel);
++
++	appendRequestValidationText(group, panelX + 20, 50, "request-validation-title", "Unsupported request parameters");
++	appendRequestValidationText(group, panelX + 20, lineY, "request-validation-detail", "This SVG diagram only supports requests without a query string.");
++	for(i=0;i<parameters.length && i<3;++i){
++		lineY += 24;
++		appendRequestValidationText(group, panelX + 20, lineY, "request-validation-parameter", "- " + parameters[i]);
++	}
++	if(parameters.length > 3){
++		lineY += 24;
++		appendRequestValidationText(group, panelX + 20, lineY, "request-validation-detail", "... and " + (parameters.length - 3) + " more parameter(s)");
++	}
++	root.appendChild(group);
++}
++
++function ensureRequestParametersValid(evt){
++	var parameters;
++	var root;
++	if(requestParameterValidation.checked == true){
++		return requestParameterValidation.valid;
++	}
++	parameters = getRequestParameters();
++	requestParameterValidation.checked = true;
++	requestParameterValidation.valid = parameters.length == 0;
++	if(requestParameterValidation.valid == false){
++		root = getRequestValidationRoot(evt);
++		renderRequestValidationMessage(root, parameters);
++	}
++	return requestParameterValidation.valid;
++}
++
++function wrapRequestParameterValidation(type){
++	var insert;
++	if(type == null || typeof type.insert != "function"){
++		return;
++	}
++	insert = type.insert;
++	type.insert = function(evt){
++		if(ensureRequestParametersValid(evt) == false){
++			return;
++		}
++		insert.call(this, evt);
++	};
++}
++
++wrapRequestParameterValidation(Option);
++wrapRequestParameterValidation(Group);
++wrapRequestParameterValidation(Parent);
++wrapRequestParameterValidation(Argument);
++wrapRequestParameterValidation(CommandLine);
++wrapRequestParameterValidation(WriteableCommandLine);
++wrapRequestParameterValidation(PropertyOption);
++wrapRequestParameterValidation(DefaultOption);
++wrapRequestParameterValidation(Command);
++wrapRequestParameterValidation(Switch);
++wrapRequestParameterValidation(SourceDestArgument);
++wrapRequestParameterValidation(Parser);
++wrapRequestParameterValidation(DefaultingCommandLine);
++wrapRequestParameterValidation(PropertiesCommandLine);
++wrapRequestParameterValidation(PreferencesCommandLine);
++wrapRequestParameterValidation(ArgumentBuilder);
++wrapRequestParameterValidation(CommandBuilder);
++wrapRequestParameterValidation(DefaultOptionBuilder);
++wrapRequestParameterValidation(GroupBuilder);
++wrapRequestParameterValidation(PatternBuilder);
++wrapRequestParameterValidation(SwitchBuilder);
++wrapRequestParameterValidation(Validator);
++wrapRequestParameterValidation(ClassValidator);
++wrapRequestParameterValidation(DateValidator);
++wrapRequestParameterValidation(EnumValidator);
++wrapRequestParameterValidation(FileValidator);
++wrapRequestParameterValidation(UrlValidator);
++wrapRequestParameterValidation(Comparators);
++wrapRequestParameterValidation(HelpFormatter);
+diff --git a/src/site/resources/images/svg/diagrams.css b/src/site/resources/images/svg/diagrams.css
+index fc1426fb..bfa89f3a 100644
+--- a/src/site/resources/images/svg/diagrams.css
++++ b/src/site/resources/images/svg/diagrams.css
+@@ -63,3 +63,39 @@ rect, line, polygon, polyline {
+ .implements, .note.connect {
+ 	stroke-dasharray: 5;
+ }
++
++.request-invalid > :not(.request-validation-message) {
++	display: none;
++}
++
++.request-validation-message {
++	display: inline;
++}
++
++.request-validation-overlay {
++	fill: rgba(255,255,255,0.96);
++	stroke: none;
++}
++
++.request-validation-panel {
++	fill: rgb(255,245,245);
++	stroke: rgb(170,0,0);
++	stroke-width: 2;
++}
++
++text.request-validation-title,
++text.request-validation-detail,
++text.request-validation-parameter {
++	text-anchor: start;
++	fill: rgb(64,0,0);
++}
++
++text.request-validation-title {
++	font-size: 18px;
++	font-weight: bold;
++}
++
++text.request-validation-detail,
++text.request-validation-parameter {
++	font-size: 12px;
++}

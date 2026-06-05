@@ -63,3 +63,39 @@ rect, line, polygon, polyline {
 .implements, .note.connect {
 	stroke-dasharray: 5;
 }
+
+.request-invalid > :not(.request-validation-message) {
+	display: none;
+}
+
+.request-validation-message {
+	display: inline;
+}
+
+.request-validation-overlay {
+	fill: rgba(255,255,255,0.96);
+	stroke: none;
+}
+
+.request-validation-panel {
+	fill: rgb(255,245,245);
+	stroke: rgb(170,0,0);
+	stroke-width: 2;
+}
+
+text.request-validation-title,
+text.request-validation-detail,
+text.request-validation-parameter {
+	text-anchor: start;
+	fill: rgb(64,0,0);
+}
+
+text.request-validation-title {
+	font-size: 18px;
+	font-weight: bold;
+}
+
+text.request-validation-detail,
+text.request-validation-parameter {
+	font-size: 12px;
+}
