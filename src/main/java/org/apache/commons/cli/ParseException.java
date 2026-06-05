@@ -60,6 +60,17 @@ public class ParseException extends Exception {
     }
 
     /**
+     * Constructs a new {@code ParseException} with the specified detail message and cause.
+     *
+     * @param message the detail message.
+     * @param cause the cause.
+     * @since 1.11.1
+     */
+    public ParseException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
      * Constructs a new {@code ParseException} wrapping the specified exception.
      *
      * @param e the Exception to wrap.

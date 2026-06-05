@@ -1,0 +1,274 @@
+diff --git a/src/main/java/org/apache/commons/cli/AlreadySelectedException.java b/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
+index 7603eac5..5c729b88 100644
+--- a/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
++++ b/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
+@@ -42,7 +42,7 @@ public class AlreadySelectedException extends ParseException {
+      */
+     public AlreadySelectedException(final OptionGroup optionGroup, final Option option) {
+         this(String.format("The option '%s' was specified but an option from this group has already been selected: '%s'", option.getKey(),
+-                optionGroup.getSelected()), optionGroup, option);
++                optionGroup.getSelected()), null, optionGroup, option);
+     }
+ 
+     /**
+@@ -51,11 +51,32 @@ public class AlreadySelectedException extends ParseException {
+      * @param message the detail message.
+      */
+     public AlreadySelectedException(final String message) {
+-        this(message, null, null);
++        this(message, null, null, null);
+     }
+ 
+-    private AlreadySelectedException(final String message, final OptionGroup optionGroup, final Option option) {
+-        super(message);
++    /**
++     * Constructs a new {@code AlreadySelectedException} with the specified detail message and cause.
++     *
++     * @param message the detail message.
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public AlreadySelectedException(final String message, final Throwable cause) {
++        this(message, cause, null, null);
++    }
++
++    /**
++     * Constructs a new {@code AlreadySelectedException} with the specified cause.
++     *
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public AlreadySelectedException(final Throwable cause) {
++        this(cause != null ? cause.getMessage() : null, cause, null, null);
++    }
++
++    private AlreadySelectedException(final String message, final Throwable cause, final OptionGroup optionGroup, final Option option) {
++        super(message, cause);
+         this.optionGroup = optionGroup;
+         this.option = option;
+     }
+diff --git a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+index 86cefd19..1ad4e30a 100644
+--- a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
++++ b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+@@ -66,7 +66,19 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
+      * @param matchingOptions the options matching the name.
+      */
+     public AmbiguousOptionException(final String option, final Collection<String> matchingOptions) {
+-        super(createMessage(option, matchingOptions), option);
++        this(option, matchingOptions, null);
++    }
++
++    /**
++     * Constructs a new AmbiguousOptionException with the specified cause.
++     *
++     * @param option the partial option name.
++     * @param matchingOptions the options matching the name.
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public AmbiguousOptionException(final String option, final Collection<String> matchingOptions, final Throwable cause) {
++        super(createMessage(option, matchingOptions), option, cause);
+         this.matchingOptions = matchingOptions;
+     }
+ 
+diff --git a/src/main/java/org/apache/commons/cli/MissingArgumentException.java b/src/main/java/org/apache/commons/cli/MissingArgumentException.java
+index adb0e42e..621c0225 100644
+--- a/src/main/java/org/apache/commons/cli/MissingArgumentException.java
++++ b/src/main/java/org/apache/commons/cli/MissingArgumentException.java
+@@ -37,8 +37,18 @@ public class MissingArgumentException extends ParseException {
+      * @since 1.2
+      */
+     public MissingArgumentException(final Option option) {
+-        this("Missing argument for option: " + option.getKey());
+-        this.option = option;
++        this("Missing argument for option: " + option.getKey(), null, option);
++    }
++
++    /**
++     * Constructs a new {@code MissingArgumentException} with the specified detail message and cause.
++     *
++     * @param option the option requiring an argument
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public MissingArgumentException(final Option option, final Throwable cause) {
++        this("Missing argument for option: " + option.getKey(), cause, option);
+     }
+ 
+     /**
+@@ -47,7 +57,33 @@ public class MissingArgumentException extends ParseException {
+      * @param message the detail message
+      */
+     public MissingArgumentException(final String message) {
+-        super(message);
++        this(message, null, null);
++    }
++
++    /**
++     * Constructs a new {@code MissingArgumentException} with the specified detail message and cause.
++     *
++     * @param message the detail message
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public MissingArgumentException(final String message, final Throwable cause) {
++        this(message, cause, null);
++    }
++
++    /**
++     * Constructs a new {@code MissingArgumentException} with the specified cause.
++     *
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public MissingArgumentException(final Throwable cause) {
++        this(cause != null ? cause.getMessage() : null, cause, null);
++    }
++
++    private MissingArgumentException(final String message, final Throwable cause, final Option option) {
++        super(message, cause);
++        this.option = option;
+     }
+ 
+     /**
+diff --git a/src/main/java/org/apache/commons/cli/MissingOptionException.java b/src/main/java/org/apache/commons/cli/MissingOptionException.java
+index 7ab19656..0d88eaa9 100644
+--- a/src/main/java/org/apache/commons/cli/MissingOptionException.java
++++ b/src/main/java/org/apache/commons/cli/MissingOptionException.java
+@@ -49,8 +49,18 @@ public class MissingOptionException extends ParseException {
+      * @since 1.2
+      */
+     public MissingOptionException(final List missingOptions) {
+-        this(createMessage(missingOptions));
+-        this.missingOptions = missingOptions;
++        this(createMessage(missingOptions), null, missingOptions);
++    }
++
++    /**
++     * Constructs a new {@code MissingSelectedException} with the specified list of missing options and cause.
++     *
++     * @param missingOptions the list of missing options and groups
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public MissingOptionException(final List missingOptions, final Throwable cause) {
++        this(createMessage(missingOptions), cause, missingOptions);
+     }
+ 
+     /**
+@@ -59,7 +69,33 @@ public class MissingOptionException extends ParseException {
+      * @param message the detail message
+      */
+     public MissingOptionException(final String message) {
+-        super(message);
++        this(message, null, null);
++    }
++
++    /**
++     * Constructs a new {@code MissingSelectedException} with the specified detail message and cause.
++     *
++     * @param message the detail message
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public MissingOptionException(final String message, final Throwable cause) {
++        this(message, cause, null);
++    }
++
++    /**
++     * Constructs a new {@code MissingSelectedException} with the specified cause.
++     *
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public MissingOptionException(final Throwable cause) {
++        this(cause != null ? cause.getMessage() : null, cause, null);
++    }
++
++    private MissingOptionException(final String message, final Throwable cause, final List missingOptions) {
++        super(message, cause);
++        this.missingOptions = missingOptions;
+     }
+ 
+     /**
+diff --git a/src/main/java/org/apache/commons/cli/ParseException.java b/src/main/java/org/apache/commons/cli/ParseException.java
+index a8a67f22..8de04357 100644
+--- a/src/main/java/org/apache/commons/cli/ParseException.java
++++ b/src/main/java/org/apache/commons/cli/ParseException.java
+@@ -59,6 +59,17 @@ public class ParseException extends Exception {
+         super(message);
+     }
+ 
++    /**
++     * Constructs a new {@code ParseException} with the specified detail message and cause.
++     *
++     * @param message the detail message.
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public ParseException(final String message, final Throwable cause) {
++        super(message, cause);
++    }
++
+     /**
+      * Constructs a new {@code ParseException} wrapping the specified exception.
+      *
+diff --git a/src/main/java/org/apache/commons/cli/UnrecognizedOptionException.java b/src/main/java/org/apache/commons/cli/UnrecognizedOptionException.java
+index 49f0ed29..6987e995 100644
+--- a/src/main/java/org/apache/commons/cli/UnrecognizedOptionException.java
++++ b/src/main/java/org/apache/commons/cli/UnrecognizedOptionException.java
+@@ -36,7 +36,18 @@ public class UnrecognizedOptionException extends ParseException {
+      * @param message the detail message.
+      */
+     public UnrecognizedOptionException(final String message) {
+-        this(message, null);
++        this(message, null, null);
++    }
++
++    /**
++     * Constructs a new {@code UnrecognizedArgumentException} with the specified detail message and cause.
++     *
++     * @param message the detail message.
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public UnrecognizedOptionException(final String message, final Throwable cause) {
++        this(message, null, cause);
+     }
+ 
+     /**
+@@ -47,10 +58,32 @@ public class UnrecognizedOptionException extends ParseException {
+      * @since 1.2
+      */
+     public UnrecognizedOptionException(final String message, final String option) {
+-        super(message);
++        this(message, option, null);
++    }
++
++    /**
++     * Constructs a new {@code UnrecognizedArgumentException} with the specified option, detail message and cause.
++     *
++     * @param message the detail message.
++     * @param option the unrecognized option.
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public UnrecognizedOptionException(final String message, final String option, final Throwable cause) {
++        super(message, cause);
+         this.option = option;
+     }
+ 
++    /**
++     * Constructs a new {@code UnrecognizedArgumentException} with the specified cause.
++     *
++     * @param cause the cause.
++     * @since 1.11.1
++     */
++    public UnrecognizedOptionException(final Throwable cause) {
++        this(cause != null ? cause.getMessage() : null, null, cause);
++    }
++
+     /**
+      * Gets the unrecognized option.
+      *

@@ -36,7 +36,18 @@ public class UnrecognizedOptionException extends ParseException {
      * @param message the detail message.
      */
     public UnrecognizedOptionException(final String message) {
-        this(message, null);
+        this(message, null, null);
+    }
+
+    /**
+     * Constructs a new {@code UnrecognizedArgumentException} with the specified detail message and cause.
+     *
+     * @param message the detail message.
+     * @param cause the cause.
+     * @since 1.11.1
+     */
+    public UnrecognizedOptionException(final String message, final Throwable cause) {
+        this(message, null, cause);
     }
 
     /**
@@ -47,8 +58,30 @@ public class UnrecognizedOptionException extends ParseException {
      * @since 1.2
      */
     public UnrecognizedOptionException(final String message, final String option) {
-        super(message);
+        this(message, option, null);
+    }
+
+    /**
+     * Constructs a new {@code UnrecognizedArgumentException} with the specified option, detail message and cause.
+     *
+     * @param message the detail message.
+     * @param option the unrecognized option.
+     * @param cause the cause.
+     * @since 1.11.1
+     */
+    public UnrecognizedOptionException(final String message, final String option, final Throwable cause) {
+        super(message, cause);
         this.option = option;
+    }
+
+    /**
+     * Constructs a new {@code UnrecognizedArgumentException} with the specified cause.
+     *
+     * @param cause the cause.
+     * @since 1.11.1
+     */
+    public UnrecognizedOptionException(final Throwable cause) {
+        this(cause != null ? cause.getMessage() : null, null, cause);
     }
 
     /**

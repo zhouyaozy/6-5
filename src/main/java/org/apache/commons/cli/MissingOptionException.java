@@ -49,8 +49,18 @@ public class MissingOptionException extends ParseException {
      * @since 1.2
      */
     public MissingOptionException(final List missingOptions) {
-        this(createMessage(missingOptions));
-        this.missingOptions = missingOptions;
+        this(createMessage(missingOptions), null, missingOptions);
+    }
+
+    /**
+     * Constructs a new {@code MissingSelectedException} with the specified list of missing options and cause.
+     *
+     * @param missingOptions the list of missing options and groups
+     * @param cause the cause.
+     * @since 1.11.1
+     */
+    public MissingOptionException(final List missingOptions, final Throwable cause) {
+        this(createMessage(missingOptions), cause, missingOptions);
     }
 
     /**
@@ -59,7 +69,33 @@ public class MissingOptionException extends ParseException {
      * @param message the detail message
      */
     public MissingOptionException(final String message) {
-        super(message);
+        this(message, null, null);
+    }
+
+    /**
+     * Constructs a new {@code MissingSelectedException} with the specified detail message and cause.
+     *
+     * @param message the detail message
+     * @param cause the cause.
+     * @since 1.11.1
+     */
+    public MissingOptionException(final String message, final Throwable cause) {
+        this(message, cause, null);
+    }
+
+    /**
+     * Constructs a new {@code MissingSelectedException} with the specified cause.
+     *
+     * @param cause the cause.
+     * @since 1.11.1
+     */
+    public MissingOptionException(final Throwable cause) {
+        this(cause != null ? cause.getMessage() : null, cause, null);
+    }
+
+    private MissingOptionException(final String message, final Throwable cause, final List missingOptions) {
+        super(message, cause);
+        this.missingOptions = missingOptions;
     }
 
     /**

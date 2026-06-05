@@ -37,8 +37,18 @@ public class MissingArgumentException extends ParseException {
      * @since 1.2
      */
     public MissingArgumentException(final Option option) {
-        this("Missing argument for option: " + option.getKey());
-        this.option = option;
+        this("Missing argument for option: " + option.getKey(), null, option);
+    }
+
+    /**
+     * Constructs a new {@code MissingArgumentException} with the specified detail message and cause.
+     *
+     * @param option the option requiring an argument
+     * @param cause the cause.
+     * @since 1.11.1
+     */
+    public MissingArgumentException(final Option option, final Throwable cause) {
+        this("Missing argument for option: " + option.getKey(), cause, option);
     }
 
     /**
@@ -47,7 +57,33 @@ public class MissingArgumentException extends ParseException {
      * @param message the detail message
      */
     public MissingArgumentException(final String message) {
-        super(message);
+        this(message, null, null);
+    }
+
+    /**
+     * Constructs a new {@code MissingArgumentException} with the specified detail message and cause.
+     *
+     * @param message the detail message
+     * @param cause the cause.
+     * @since 1.11.1
+     */
+    public MissingArgumentException(final String message, final Throwable cause) {
+        this(message, cause, null);
+    }
+
+    /**
+     * Constructs a new {@code MissingArgumentException} with the specified cause.
+     *
+     * @param cause the cause.
+     * @since 1.11.1
+     */
+    public MissingArgumentException(final Throwable cause) {
+        this(cause != null ? cause.getMessage() : null, cause, null);
+    }
+
+    private MissingArgumentException(final String message, final Throwable cause, final Option option) {
+        super(message, cause);
+        this.option = option;
     }
 
     /**
