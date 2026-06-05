@@ -38,4 +38,15 @@ class AlreadySelectedExceptionTest {
         assertEquals(option, new AlreadySelectedException(optionGroup, option).getOption());
         assertEquals(optionGroup, new AlreadySelectedException(optionGroup, option).getOptionGroup());
     }
+
+    @Test
+    void testConstructorWithOptionGroup() throws AlreadySelectedException {
+        final OptionGroup optionGroup = new OptionGroup();
+        optionGroup.setSelected(new Option("b", "d"));
+        final Option option = new Option("a", "d");
+        final AlreadySelectedException e = new AlreadySelectedException(optionGroup, option);
+        assertEquals("The option 'a' was specified but an option from this group has already been selected: 'b'", e.getMessage());
+        assertEquals(option, e.getOption());
+        assertEquals(optionGroup, e.getOptionGroup());
+    }
 }
