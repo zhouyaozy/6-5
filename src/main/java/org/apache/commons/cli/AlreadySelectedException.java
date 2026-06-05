@@ -36,8 +36,8 @@ public class AlreadySelectedException extends ParseException {
     /**
      * Constructs a new {@code AlreadySelectedException} for the specified option group.
      *
-     * @param optionGroup the option group already selected.
-     * @param option the option that triggered the exception.
+     * @param optionGroup the option group already selected
+     * @param option the option that triggered the exception
      * @since 1.2
      */
     public AlreadySelectedException(final OptionGroup optionGroup, final Option option) {

@@ -33,27 +33,27 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
     private static final long serialVersionUID = 5829816121277947229L;
 
     /**
-     * Build the exception message from the specified list of options.
+     * Builds the exception message from the specified list of options.
      *
-     * @param option
-     * @param matchingOptions
-     * @return
+     * @param optionName the partial option name
+     * @param matchingOptions the options matching the partial name
+     * @return the formatted message
      */
-    private static String createMessage(final String option, final Collection<String> matchingOptions) {
-        final StringBuilder buf = new StringBuilder("Ambiguous option: '");
-        buf.append(option);
-        buf.append("'  (could be: ");
-        final Iterator<String> it = matchingOptions.iterator();
-        while (it.hasNext()) {
-            buf.append(Char.APOS);
-            buf.append(it.next());
-            buf.append(Char.APOS);
-            if (it.hasNext()) {
-                buf.append(", ");
+    private static String createMessage(final String optionName, final Collection<String> matchingOptions) {
+        final StringBuilder builder = new StringBuilder("Ambiguous option: '");
+        builder.append(optionName);
+        builder.append("'  (could be: ");
+        final Iterator<String> iterator = matchingOptions.iterator();
+        while (iterator.hasNext()) {
+            builder.append(Char.APOS);
+            builder.append(iterator.next());
+            builder.append(Char.APOS);
+            if (iterator.hasNext()) {
+                builder.append(", ");
             }
         }
-        buf.append(")");
-        return buf.toString();
+        builder.append(")");
+        return builder.toString();
     }
 
     /** The list of options matching the partial name specified */
@@ -62,11 +62,11 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
     /**
      * Constructs a new AmbiguousOptionException.
      *
-     * @param option the partial option name.
-     * @param matchingOptions the options matching the name.
+     * @param optionName the partial option name
+     * @param matchingOptions the options matching the name
      */
-    public AmbiguousOptionException(final String option, final Collection<String> matchingOptions) {
-        super(createMessage(option, matchingOptions), option);
+    public AmbiguousOptionException(final String optionName, final Collection<String> matchingOptions) {
+        super(createMessage(optionName, matchingOptions), optionName);
         this.matchingOptions = matchingOptions;
     }
 
