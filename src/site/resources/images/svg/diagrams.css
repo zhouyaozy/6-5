@@ -63,3 +63,16 @@ rect, line, polygon, polyline {
 .implements, .note.connect {
 	stroke-dasharray: 5;
 }
+
+.validation-errors {
+	font-family: sans-serif;
+	font-size: 12px;
+}
+
+.error-title {
+	font-size: 14px;
+}
+
+.error-text {
+	font-size: 12px;
+}

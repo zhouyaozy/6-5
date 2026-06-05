@@ -24,6 +24,119 @@ var displayAttributes = true;
 var displayMethods = true;
 var displayNotes = true;
 
+var validationErrors = [];
+
+function validateParams() {
+	validationErrors = [];
+	var params = getUrlParams();
+	var validParams = ['attributes', 'methods', 'notes'];
+	var validBooleanValues = ['true', 'false', '1', '0', 'yes', 'no'];
+	
+	for (var key in params) {
+		if (!validParams.includes(key)) {
+			validationErrors.push('未知参数: ' + key);
+		} else {
+			var value = params[key];
+			if (!validBooleanValues.includes(value.toLowerCase())) {
+				validationErrors.push('参数 ' + key + ' 的值无效: ' + value + '，应为 boolean 值');
+			}
+		}
+	}
+	
+	return validationErrors.length === 0;
+}
+
+function getUrlParams() {
+	var params = {};
+	var queryString = window.location.search.substring(1);
+	var pairs = queryString.split('&');
+	
+	for (var i = 0; i < pairs.length; i++) {
+		var pair = pairs[i].split('=');
+		if (pair[0]) {
+			params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+		}
+	}
+	
+	return params;
+}
+
+function parseBoolean(value) {
+	if (typeof value === 'undefined') return true;
+	var lowerValue = String(value).toLowerCase();
+	return lowerValue === 'true' || lowerValue === '1' || lowerValue === 'yes';
+}
+
+function applyParams() {
+	var params = getUrlParams();
+	if (params.attributes !== undefined) {
+		displayAttributes = parseBoolean(params.attributes);
+	}
+	if (params.methods !== undefined) {
+		displayMethods = parseBoolean(params.methods);
+	}
+	if (params.notes !== undefined) {
+		displayNotes = parseBoolean(params.notes);
+	}
+}
+
+function displayValidationErrors() {
+	if (validationErrors.length === 0) return;
+	
+	var svg = document.querySelector('svg');
+	if (!svg) return;
+	
+	var errorGroup = document.createElementNS(namespace, 'g');
+	errorGroup.setAttribute('class', 'validation-errors');
+	
+	var bgWidth = 400;
+	var bgHeight = 50 + validationErrors.length * 20;
+	
+	var bg = document.createElementNS(namespace, 'rect');
+	bg.setAttribute('x', '50');
+	bg.setAttribute('y', '50');
+	bg.setAttribute('width', bgWidth);
+	bg.setAttribute('height', bgHeight);
+	bg.setAttribute('fill', '#ffcccc');
+	bg.setAttribute('stroke', '#cc0000');
+	bg.setAttribute('stroke-width', '2');
+	errorGroup.appendChild(bg);
+	
+	var title = document.createElementNS(namespace, 'text');
+	title.setAttribute('x', '70');
+	title.setAttribute('y', '80');
+	title.setAttribute('class', 'error-title');
+	title.setAttribute('font-weight', 'bold');
+	title.setAttribute('fill', '#cc0000');
+	title.appendChild(document.createTextNode('参数验证错误:'));
+	errorGroup.appendChild(title);
+	
+	for (var i = 0; i < validationErrors.length; i++) {
+		var errorText = document.createElementNS(namespace, 'text');
+		errorText.setAttribute('x', '70');
+		errorText.setAttribute('y', 105 + i * 20);
+		errorText.setAttribute('class', 'error-text');
+		errorText.setAttribute('fill', '#660000');
+		errorText.appendChild(document.createTextNode('- ' + validationErrors[i]));
+		errorGroup.appendChild(errorText);
+	}
+	
+	svg.insertBefore(errorGroup, svg.firstChild);
+}
+
+function init() {
+	if (!validateParams()) {
+		displayValidationErrors();
+	}
+	applyParams();
+}
+
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', init);
+} else {
+	init();
+}
+
 function Type(name){
 	this.width = 160;
 	this.style = "type";
