@@ -29,13 +29,21 @@ import org.junit.jupiter.api.Test;
 class AlreadySelectedExceptionTest {
 
     @Test
-    void testConstructor() {
+    void testConstructor() throws AlreadySelectedException {
         assertEquals("a", new AlreadySelectedException("a").getMessage());
         assertNull(new AlreadySelectedException("a").getOption());
+
         final Option option = new Option("a", "d");
+        final Option selectedOption = new Option("b", false, "");
         final OptionGroup optionGroup = new OptionGroup();
-        assertNotNull(new AlreadySelectedException(optionGroup, option).getMessage());
-        assertEquals(option, new AlreadySelectedException(optionGroup, option).getOption());
-        assertEquals(optionGroup, new AlreadySelectedException(optionGroup, option).getOptionGroup());
+        optionGroup.addOption(selectedOption);
+        optionGroup.setSelected(selectedOption);
+
+        final AlreadySelectedException exception = new AlreadySelectedException(optionGroup, option);
+
+        assertNotNull(exception.getMessage());
+        assertEquals("The option 'a' was specified but an option from this group has already been selected: 'b'", exception.getMessage());
+        assertEquals(option, exception.getOption());
+        assertEquals(optionGroup, exception.getOptionGroup());
     }
 }

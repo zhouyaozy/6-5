@@ -1,0 +1,99 @@
+diff --git a/src/main/java/org/apache/commons/cli/AlreadySelectedException.java b/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
+index 7603eac5..11d023fe 100644
+--- a/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
++++ b/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
+@@ -33,6 +33,11 @@ public class AlreadySelectedException extends ParseException {
+     /** The option that triggered the exception. */
+     private final Option option;
+ 
++    private static String createMessage(final OptionGroup optionGroup, final Option option) {
++        return String.format("The option '%s' was specified but an option from this group has already been selected: '%s'", option.getKey(),
++                optionGroup.getSelected());
++    }
++
+     /**
+      * Constructs a new {@code AlreadySelectedException} for the specified option group.
+      *
+@@ -41,8 +46,7 @@ public class AlreadySelectedException extends ParseException {
+      * @since 1.2
+      */
+     public AlreadySelectedException(final OptionGroup optionGroup, final Option option) {
+-        this(String.format("The option '%s' was specified but an option from this group has already been selected: '%s'", option.getKey(),
+-                optionGroup.getSelected()), optionGroup, option);
++        this(createMessage(optionGroup, option), optionGroup, option);
+     }
+ 
+     /**
+diff --git a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+index 86cefd19..6896aa65 100644
+--- a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
++++ b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+@@ -42,7 +42,7 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
+     private static String createMessage(final String option, final Collection<String> matchingOptions) {
+         final StringBuilder buf = new StringBuilder("Ambiguous option: '");
+         buf.append(option);
+-        buf.append("'  (could be: ");
++        buf.append("' (could be: ");
+         final Iterator<String> it = matchingOptions.iterator();
+         while (it.hasNext()) {
+             buf.append(Char.APOS);
+diff --git a/src/test/java/org/apache/commons/cli/AlreadySelectedExceptionTest.java b/src/test/java/org/apache/commons/cli/AlreadySelectedExceptionTest.java
+index 07ef961b..69446f44 100644
+--- a/src/test/java/org/apache/commons/cli/AlreadySelectedExceptionTest.java
++++ b/src/test/java/org/apache/commons/cli/AlreadySelectedExceptionTest.java
+@@ -29,13 +29,21 @@ import org.junit.jupiter.api.Test;
+ class AlreadySelectedExceptionTest {
+ 
+     @Test
+-    void testConstructor() {
++    void testConstructor() throws AlreadySelectedException {
+         assertEquals("a", new AlreadySelectedException("a").getMessage());
+         assertNull(new AlreadySelectedException("a").getOption());
++
+         final Option option = new Option("a", "d");
++        final Option selectedOption = new Option("b", false, "");
+         final OptionGroup optionGroup = new OptionGroup();
+-        assertNotNull(new AlreadySelectedException(optionGroup, option).getMessage());
+-        assertEquals(option, new AlreadySelectedException(optionGroup, option).getOption());
+-        assertEquals(optionGroup, new AlreadySelectedException(optionGroup, option).getOptionGroup());
++        optionGroup.addOption(selectedOption);
++        optionGroup.setSelected(selectedOption);
++
++        final AlreadySelectedException exception = new AlreadySelectedException(optionGroup, option);
++
++        assertNotNull(exception.getMessage());
++        assertEquals("The option 'a' was specified but an option from this group has already been selected: 'b'", exception.getMessage());
++        assertEquals(option, exception.getOption());
++        assertEquals(optionGroup, exception.getOptionGroup());
+     }
+ }
+diff --git a/src/test/java/org/apache/commons/cli/bug/BugCLI252Test.java b/src/test/java/org/apache/commons/cli/bug/BugCLI252Test.java
+index 7bef913b..f41f6eb0 100644
+--- a/src/test/java/org/apache/commons/cli/bug/BugCLI252Test.java
++++ b/src/test/java/org/apache/commons/cli/bug/BugCLI252Test.java
+@@ -17,6 +17,7 @@
+ 
+ package org.apache.commons.cli.bug;
+ 
++import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ import org.apache.commons.cli.AmbiguousOptionException;
+@@ -37,12 +38,14 @@ class BugCLI252Test {
+ 
+     @Test
+     void testAmbiquousOptionName() {
+-        assertThrows(AmbiguousOptionException.class, () -> new DefaultParser().parse(getOptions(), new String[] { "--pref" }));
++        final AmbiguousOptionException exception = assertThrows(AmbiguousOptionException.class,
++                () -> new DefaultParser().parse(getOptions(), new String[] { "--pref" }));
++
++        assertEquals("Ambiguous option: '--pref' (could be: 'prefix', 'prefixplusplus')", exception.getMessage());
+     }
+ 
+     @Test
+     void testExactOptionNameMatch() throws ParseException {
+-        new DefaultParser().parse(getOptions(), new String[] {"--prefix"});
++        new DefaultParser().parse(getOptions(), new String[] { "--prefix" });
+     }
+-
+ }
