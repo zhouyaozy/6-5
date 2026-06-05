@@ -35,14 +35,16 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
     /**
      * Build the exception message from the specified list of options.
      *
-     * @param option
-     * @param matchingOptions
-     * @return
+     * @param option the partial option name.
+     * @param matchingOptions the options matching the name.
+     * @return the exception message.
      */
     private static String createMessage(final String option, final Collection<String> matchingOptions) {
-        final StringBuilder buf = new StringBuilder("Ambiguous option: '");
+        final StringBuilder buf = new StringBuilder("Ambiguous option: ");
+        buf.append(Char.APOS);
         buf.append(option);
-        buf.append("'  (could be: ");
+        buf.append(Char.APOS);
+        buf.append("  (could be: ");
         final Iterator<String> it = matchingOptions.iterator();
         while (it.hasNext()) {
             buf.append(Char.APOS);
