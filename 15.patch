@@ -1,0 +1,311 @@
+diff --git a/DEPLOY.md b/DEPLOY.md
+new file mode 100644
+index 00000000..df0dd650
+--- /dev/null
++++ b/DEPLOY.md
+@@ -0,0 +1,163 @@
++<!---
++ Licensed to the Apache Software Foundation (ASF) under one or more
++ contributor license agreements.  See the NOTICE file distributed with
++ this work for additional information regarding copyright ownership.
++ The ASF licenses this file to You under the Apache License, Version 2.0
++ (the "License"); you may not use this file except in compliance with
++ the License.  You may obtain a copy of the License at
++
++      https://www.apache.org/licenses/LICENSE-2.0
++
++ Unless required by applicable law or agreed to in writing, software
++ distributed under the License is distributed on an "AS IS" BASIS,
++ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ See the License for the specific language governing permissions and
++ limitations under the License.
++-->
++# Apache Commons CLI - Deployment Guide
++
++## Prerequisites
++
++- Java JDK 8 or later (`maven.compiler.source` is set to 1.8 in `pom.xml`)
++- Apache Maven 3.x
++- For site deployment: SVN client (for Apache infrastructure)
++
++## Build the Library
++
++```bash
++mvn clean verify
++```
++
++This runs the default goal which includes compilation, tests, checkstyle, SpotBugs, PMD, and japicmp checks.
++
++To skip tests:
++
++```bash
++mvn clean verify -DskipTests
++```
++
++## Build the Project Site
++
++```bash
++mvn clean site
++```
++
++The generated site is located at `target/site/`.
++
++To include JaCoCo code coverage (without failing on coverage thresholds):
++
++```bash
++mvn clean site -Dcommons.jacoco.haltOnFailure=false -Pjacoco
++```
++
++## SVG Class Diagrams Deployment
++
++The project site includes interactive SVG class diagrams for the CLI2 API.
++These diagrams are located at `src/site/resources/images/svg/` and consist of:
++
++| File | Purpose |
++|------|---------|
++| `diagrams.js` | Core rendering engine: `Type`, `Interface`, `Class`, `PackageSymbol` constructors |
++| `diagrams-cli2.js` | CLI2 class diagram data definitions (interfaces, classes, builders, validators) |
++| `diagrams.css` | Styling for SVG diagram elements (colors, strokes, markers) |
++| `util.svg` | Shared SVG marker definitions (`HollowArrow`, `FilledArrow`) |
++| `options.svg` | Options hierarchy diagram |
++| `commandlines.svg` | CommandLine hierarchy diagram |
++
++### How the Diagrams Work
++
++1. SVG files (`options.svg`, `commandlines.svg`) load `diagrams.js` and `diagrams-cli2.js` via `<script xlink:href="..."/>` references
++2. `diagrams-cli2.js` creates global `Interface` and `Class` instances using constructors from `diagrams.js`
++3. Each SVG `<g>` element uses `onload` handlers to invoke `.insert(evt)` on the diagram objects
++4. CSS styling from `diagrams.css` is applied via `<?xml-stylesheet?>` processing instruction
++5. Arrow markers for inheritance/implements relationships reference `util.svg#HollowArrow`
++
++### Server Configuration Requirements
++
++The SVG diagrams require proper server configuration to function correctly:
++
++**MIME Types** (configured in `.htaccess`):
++
++```
++AddType image/svg+xml .svg
++AddType text/css .css
++AddType application/javascript .js
++```
++
++**Character Encoding** (configured in `.htaccess`):
++
++```
++AddCharset utf-8 .txt .html .css .js
++```
++
++**Caching** (configured in `.htaccess`):
++
++```
++ExpiresByType image/svg+xml "access plus 1 week"
++ExpiresByType text/css "access plus 1 week"
++ExpiresByType application/javascript "access plus 1 week"
++```
++
++**Cross-Origin Requirements**:
++
++- The CSS `marker-end: url(util.svg#HollowArrow)` is a cross-file SVG fragment reference
++- All SVG, CSS, and JS files **must be served from the same origin** for markers to render
++- If deploying behind a CDN or reverse proxy, ensure `util.svg` is accessible at the same base URL as the diagram SVG files
++- Do not set `Content-Security-Policy` headers that block `script-src` for inline SVG event handlers
++
++### Print Support
++
++`diagrams.css` includes `@media print` rules that:
++- Use lighter fill colors suitable for printing
++- Reduce stroke width for better print output
++- Disable SVG markers (arrows) which may not render correctly in print
++
++## Deploy the Site to Apache Infrastructure
++
++### Initial Setup
++
++The `setup-checkout` Maven profile automatically checks out the site content on first build:
++
++```bash
++mvn pre-site -Psetup-checkout
++```
++
++This creates a `site-content/` directory with an SVN checkout of the production site.
++
++### Deploy Site
++
++```bash
++mvn site-deploy
++```
++
++This publishes the site to the Apache SVN repository configured in `distributionManagement`.
++
++### Release Candidate Site
++
++For release candidate staging:
++
++```bash
++mvn site-deploy -Prc
++```
++
++## Build Distribution Artifacts
++
++```bash
++mvn clean package
++```
++
++This produces:
++- `target/commons-cli-1.11.1-SNAPSHOT.jar` - Library JAR
++- `target/commons-cli-1.11.1-SNAPSHOT-bin.tar.gz` / `.zip` - Binary distribution
++- `target/commons-cli-1.11.1-SNAPSHOT-src.tar.gz` / `.zip` - Source distribution
++
++Assembly descriptors are defined in `src/assembly/bin.xml` and `src/assembly/src.xml`.
++
++## Deployment Checklist
++
++- [ ] Verify all tests pass: `mvn clean verify`
++- [ ] Verify site builds correctly: `mvn clean site`
++- [ ] Check SVG diagrams render in browser (open `target/site/images/svg/options.svg`)
++- [ ] Verify `util.svg` is accessible alongside diagram SVG files
++- [ ] Confirm `.htaccess` is deployed with the site resources
++- [ ] For Apache deployment: verify SVN credentials and site-deploy works
+diff --git a/src/site/resources/.htaccess b/src/site/resources/.htaccess
+index 93ef36b6..468f766b 100644
+--- a/src/site/resources/.htaccess
++++ b/src/site/resources/.htaccess
+@@ -13,4 +13,21 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-AddCharset utf-8 .txt .html
++AddCharset utf-8 .txt .html .css .js
++
++AddType image/svg+xml .svg
++AddType text/css .css
++AddType application/javascript .js
++
++<IfModule mod_expires.c>
++    ExpiresActive On
++    ExpiresByType image/svg+xml "access plus 1 week"
++    ExpiresByType text/css "access plus 1 week"
++    ExpiresByType application/javascript "access plus 1 week"
++</IfModule>
++
++<IfModule mod_headers.c>
++    <FilesMatch "\.(svg|css|js)$">
++        Header set X-Content-Type-Options "nosniff"
++    </FilesMatch>
++</IfModule>
+diff --git a/src/site/resources/images/svg/diagrams-cli2.js b/src/site/resources/images/svg/diagrams-cli2.js
+index 38efec58..7abff854 100644
+--- a/src/site/resources/images/svg/diagrams-cli2.js
++++ b/src/site/resources/images/svg/diagrams-cli2.js
+@@ -14,7 +14,13 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+- 
++
++"use strict";
++
++if (typeof Interface === "undefined" || typeof Class === "undefined") {
++    throw new Error("diagrams-cli2.js requires diagrams.js to be loaded first");
++}
++
+ var Option = new Interface("Option");
+ Option.addMethod("process(...)");
+ Option.addMethod("canProcess(...)");
+@@ -168,17 +174,6 @@ DefaultOptionBuilder.addAttribute("shortPrefix");
+ DefaultOptionBuilder.addAttribute("longPrefix");
+ DefaultOptionBuilder.addAttribute("burstEnabled");
+ 
+-var DefaultOptionBuilder = new Class("DefaultOptionBuilder");
+-DefaultOptionBuilder.addMethod("withId(...)");
+-DefaultOptionBuilder.addMethod("withShortName(...)");
+-DefaultOptionBuilder.addMethod("withLongName(...)");
+-DefaultOptionBuilder.addMethod("withDescription(...)");
+-DefaultOptionBuilder.addMethod("withArgument(...)");
+-DefaultOptionBuilder.addMethod("withChildren(...)");
+-DefaultOptionBuilder.addMethod("withRequired(...)");
+-DefaultOptionBuilder.addMethod("create()");
+-DefaultOptionBuilder.addMethod("reset()");
+-
+ var GroupBuilder = new Class("GroupBuilder");
+ GroupBuilder.addMethod("withName(...)");
+ GroupBuilder.addMethod("withDescription(...)");
+@@ -234,10 +229,10 @@ FileValidator.addAttribute("hidden");
+ FileValidator.addAttribute("readable");
+ FileValidator.addAttribute("writable");
+ 
+-var FileValidator = new Class("FileValidator");
+-FileValidator.addAttribute("format");
+-FileValidator.addAttribute("minimum");
+-FileValidator.addAttribute("maximum");
++var NumberValidator = new Class("NumberValidator");
++NumberValidator.addAttribute("format");
++NumberValidator.addAttribute("minimum");
++NumberValidator.addAttribute("maximum");
+ 
+ var UrlValidator = new Class("UrlValidator");
+ UrlValidator.addAttribute("format");
+diff --git a/src/site/resources/images/svg/diagrams.css b/src/site/resources/images/svg/diagrams.css
+index fc1426fb..9a0faed0 100644
+--- a/src/site/resources/images/svg/diagrams.css
++++ b/src/site/resources/images/svg/diagrams.css
+@@ -14,7 +14,9 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+- 
++
++@namespace svg "http://www.w3.org/2000/svg";
++
+ .option .outline, .option polygon.note {
+ 	fill:rgb(191,255,255);
+ }
+@@ -57,9 +59,46 @@ rect, line, polygon, polyline {
+ 
+ .implements, .extends {
+ 	fill: none;
+-	marker-end: url(util.svg#HollowArrow); 
++	marker-end: url(util.svg#HollowArrow);
+ }
+ 
+ .implements, .note.connect {
+ 	stroke-dasharray: 5;
+ }
++
++@media print {
++	.option .outline, .option polygon.note {
++		fill: rgb(220, 240, 240);
++	}
++	.group rect.outline, .group polygon.note {
++		fill: rgb(240, 220, 220);
++	}
++	.parent rect.outline, .parent polygon.note {
++		fill: rgb(220, 240, 220);
++	}
++	.argument rect.outline, .argument polygon.note {
++		fill: rgb(220, 220, 240);
++	}
++	.property rect.outline, .property polygon.note {
++		fill: rgb(240, 220, 240);
++	}
++	.package rect {
++		fill: rgb(240, 240, 220);
++	}
++	.package rect.inner {
++		fill: rgb(255, 255, 255);
++	}
++	rect, line, polygon, polyline {
++		stroke: rgb(0, 0, 0);
++		stroke-width: 1;
++	}
++	text {
++		fill: rgb(0, 0, 0);
++	}
++	.implements, .extends {
++		marker-end: none;
++	}
++	.implements::after, .extends::after {
++		content: ">";
++	}
++}

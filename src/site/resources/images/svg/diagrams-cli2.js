@@ -14,7 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
+"use strict";
+
+if (typeof Interface === "undefined" || typeof Class === "undefined") {
+    throw new Error("diagrams-cli2.js requires diagrams.js to be loaded first");
+}
+
 var Option = new Interface("Option");
 Option.addMethod("process(...)");
 Option.addMethod("canProcess(...)");
@@ -168,17 +174,6 @@ DefaultOptionBuilder.addAttribute("shortPrefix");
 DefaultOptionBuilder.addAttribute("longPrefix");
 DefaultOptionBuilder.addAttribute("burstEnabled");
 
-var DefaultOptionBuilder = new Class("DefaultOptionBuilder");
-DefaultOptionBuilder.addMethod("withId(...)");
-DefaultOptionBuilder.addMethod("withShortName(...)");
-DefaultOptionBuilder.addMethod("withLongName(...)");
-DefaultOptionBuilder.addMethod("withDescription(...)");
-DefaultOptionBuilder.addMethod("withArgument(...)");
-DefaultOptionBuilder.addMethod("withChildren(...)");
-DefaultOptionBuilder.addMethod("withRequired(...)");
-DefaultOptionBuilder.addMethod("create()");
-DefaultOptionBuilder.addMethod("reset()");
-
 var GroupBuilder = new Class("GroupBuilder");
 GroupBuilder.addMethod("withName(...)");
 GroupBuilder.addMethod("withDescription(...)");
@@ -234,10 +229,10 @@ FileValidator.addAttribute("hidden");
 FileValidator.addAttribute("readable");
 FileValidator.addAttribute("writable");
 
-var FileValidator = new Class("FileValidator");
-FileValidator.addAttribute("format");
-FileValidator.addAttribute("minimum");
-FileValidator.addAttribute("maximum");
+var NumberValidator = new Class("NumberValidator");
+NumberValidator.addAttribute("format");
+NumberValidator.addAttribute("minimum");
+NumberValidator.addAttribute("maximum");
 
 var UrlValidator = new Class("UrlValidator");
 UrlValidator.addAttribute("format");
