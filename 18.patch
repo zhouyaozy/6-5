@@ -1,0 +1,72 @@
+diff --git a/src/main/java/org/apache/commons/cli/AlreadySelectedException.java b/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
+index 7603eac5..fd820cbc 100644
+--- a/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
++++ b/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
+@@ -41,8 +41,9 @@ public class AlreadySelectedException extends ParseException {
+      * @since 1.2
+      */
+     public AlreadySelectedException(final OptionGroup optionGroup, final Option option) {
+-        this(String.format("The option '%s' was specified but an option from this group has already been selected: '%s'", option.getKey(),
+-                optionGroup.getSelected()), optionGroup, option);
++        this(String.format("The option '%s' was specified but an option from this group has already been selected: '%s'",
++                option == null ? "null" : option.getKey(),
++                optionGroup == null ? "null" : optionGroup.getSelected()), optionGroup, option);
+     }
+ 
+     /**
+diff --git a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+index 86cefd19..0935dd99 100644
+--- a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
++++ b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+@@ -42,14 +42,16 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
+     private static String createMessage(final String option, final Collection<String> matchingOptions) {
+         final StringBuilder buf = new StringBuilder("Ambiguous option: '");
+         buf.append(option);
+-        buf.append("'  (could be: ");
+-        final Iterator<String> it = matchingOptions.iterator();
+-        while (it.hasNext()) {
+-            buf.append(Char.APOS);
+-            buf.append(it.next());
+-            buf.append(Char.APOS);
+-            if (it.hasNext()) {
+-                buf.append(", ");
++        buf.append("' (could be: ");
++        if (matchingOptions != null) {
++            final Iterator<String> it = matchingOptions.iterator();
++            while (it.hasNext()) {
++                buf.append(Char.APOS);
++                buf.append(it.next());
++                buf.append(Char.APOS);
++                if (it.hasNext()) {
++                    buf.append(", ");
++                }
+             }
+         }
+         buf.append(")");
+diff --git a/src/main/java/org/apache/commons/cli/MissingArgumentException.java b/src/main/java/org/apache/commons/cli/MissingArgumentException.java
+index adb0e42e..f82fc418 100644
+--- a/src/main/java/org/apache/commons/cli/MissingArgumentException.java
++++ b/src/main/java/org/apache/commons/cli/MissingArgumentException.java
+@@ -37,7 +37,7 @@ public class MissingArgumentException extends ParseException {
+      * @since 1.2
+      */
+     public MissingArgumentException(final Option option) {
+-        this("Missing argument for option: " + option.getKey());
++        this("Missing argument for option: " + (option == null ? "null" : option.getKey()));
+         this.option = option;
+     }
+ 
+diff --git a/src/main/java/org/apache/commons/cli/MissingOptionException.java b/src/main/java/org/apache/commons/cli/MissingOptionException.java
+index 7ab19656..f4cbaaff 100644
+--- a/src/main/java/org/apache/commons/cli/MissingOptionException.java
++++ b/src/main/java/org/apache/commons/cli/MissingOptionException.java
+@@ -34,6 +34,9 @@ public class MissingOptionException extends ParseException {
+      */
+     private static String createMessage(final List<?> missingOptions) {
+         final StringBuilder buf = new StringBuilder("Missing required option");
++        if (missingOptions == null) {
++            return buf.append("s: null").toString();
++        }
+         buf.append(missingOptions.size() == 1 ? "" : "s").append(": ");
+         final String string = missingOptions.toString();
+         return buf.append(string.substring(1, string.length() - 1)).toString();

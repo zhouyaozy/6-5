@@ -37,7 +37,7 @@ public class MissingArgumentException extends ParseException {
      * @since 1.2
      */
     public MissingArgumentException(final Option option) {
-        this("Missing argument for option: " + option.getKey());
+        this("Missing argument for option: " + (option == null ? "null" : option.getKey()));
         this.option = option;
     }
 

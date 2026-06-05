@@ -34,6 +34,9 @@ public class MissingOptionException extends ParseException {
      */
     private static String createMessage(final List<?> missingOptions) {
         final StringBuilder buf = new StringBuilder("Missing required option");
+        if (missingOptions == null) {
+            return buf.append("s: null").toString();
+        }
         buf.append(missingOptions.size() == 1 ? "" : "s").append(": ");
         final String string = missingOptions.toString();
         return buf.append(string.substring(1, string.length() - 1)).toString();

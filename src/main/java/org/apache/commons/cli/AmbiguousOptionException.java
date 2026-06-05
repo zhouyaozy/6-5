@@ -42,14 +42,16 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
     private static String createMessage(final String option, final Collection<String> matchingOptions) {
         final StringBuilder buf = new StringBuilder("Ambiguous option: '");
         buf.append(option);
-        buf.append("'  (could be: ");
-        final Iterator<String> it = matchingOptions.iterator();
-        while (it.hasNext()) {
-            buf.append(Char.APOS);
-            buf.append(it.next());
-            buf.append(Char.APOS);
-            if (it.hasNext()) {
-                buf.append(", ");
+        buf.append("' (could be: ");
+        if (matchingOptions != null) {
+            final Iterator<String> it = matchingOptions.iterator();
+            while (it.hasNext()) {
+                buf.append(Char.APOS);
+                buf.append(it.next());
+                buf.append(Char.APOS);
+                if (it.hasNext()) {
+                    buf.append(", ");
+                }
             }
         }
         buf.append(")");
