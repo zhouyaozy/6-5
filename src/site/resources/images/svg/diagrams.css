@@ -31,6 +31,9 @@
 .property rect.outline, .property polygon.note {
 	fill:rgb(255,191,255);
 }
+.validator rect.outline, .validator polygon.note {
+	fill:rgb(191,191,191);
+}
 
 .package rect {
 	fill:rgb(255,255,191);

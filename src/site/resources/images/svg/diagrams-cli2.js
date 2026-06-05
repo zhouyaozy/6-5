@@ -234,15 +234,19 @@ FileValidator.addAttribute("hidden");
 FileValidator.addAttribute("readable");
 FileValidator.addAttribute("writable");
 
-var FileValidator = new Class("FileValidator");
-FileValidator.addAttribute("format");
-FileValidator.addAttribute("minimum");
-FileValidator.addAttribute("maximum");
+var NumberValidator = new Class("NumberValidator");
+NumberValidator.addAttribute("format");
+NumberValidator.addAttribute("minimum");
+NumberValidator.addAttribute("maximum");
 
 var UrlValidator = new Class("UrlValidator");
 UrlValidator.addAttribute("format");
 UrlValidator.addAttribute("minimum");
 UrlValidator.addAttribute("maximum");
+
+var RequestParameterValidator = new Class("RequestParameterValidator");
+RequestParameterValidator.addMethod("validate(...)");
+
 
 
 
