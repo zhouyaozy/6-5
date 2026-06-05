@@ -33,14 +33,14 @@ public class MissingOptionException extends ParseException {
      * @param missingOptions the list of missing options and groups
      */
     private static String createMessage(final List<?> missingOptions) {
-        final StringBuilder buf = new StringBuilder("Missing required option");
-        buf.append(missingOptions.size() == 1 ? "" : "s").append(": ");
-        final String string = missingOptions.toString();
-        return buf.append(string.substring(1, string.length() - 1)).toString();
+        final StringBuilder messageBuilder = new StringBuilder("Missing required option");
+        messageBuilder.append(missingOptions.size() == 1 ? "" : "s").append(": ");
+        final String optionsString = missingOptions.toString();
+        return messageBuilder.append(optionsString.substring(1, optionsString.length() - 1)).toString();
     }
 
     /** The list of missing options and groups */
-    private List missingOptions;
+    private final List missingOptions;
 
     /**
      * Constructs a new {@code MissingSelectedException} with the specified list of missing options.

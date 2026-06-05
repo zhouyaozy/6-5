@@ -1,0 +1,74 @@
+diff --git a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+index 86cefd19..2280cfde 100644
+--- a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
++++ b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+@@ -40,20 +40,20 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
+      * @return
+      */
+     private static String createMessage(final String option, final Collection<String> matchingOptions) {
+-        final StringBuilder buf = new StringBuilder("Ambiguous option: '");
+-        buf.append(option);
+-        buf.append("'  (could be: ");
+-        final Iterator<String> it = matchingOptions.iterator();
+-        while (it.hasNext()) {
+-            buf.append(Char.APOS);
+-            buf.append(it.next());
+-            buf.append(Char.APOS);
+-            if (it.hasNext()) {
+-                buf.append(", ");
++        final StringBuilder messageBuilder = new StringBuilder("Ambiguous option: '");
++        messageBuilder.append(option);
++        messageBuilder.append("'  (could be: ");
++        final Iterator<String> optionIterator = matchingOptions.iterator();
++        while (optionIterator.hasNext()) {
++            messageBuilder.append(Char.APOS);
++            messageBuilder.append(optionIterator.next());
++            messageBuilder.append(Char.APOS);
++            if (optionIterator.hasNext()) {
++                messageBuilder.append(", ");
+             }
+         }
+-        buf.append(")");
+-        return buf.toString();
++        messageBuilder.append(")");
++        return messageBuilder.toString();
+     }
+ 
+     /** The list of options matching the partial name specified */
+diff --git a/src/main/java/org/apache/commons/cli/MissingArgumentException.java b/src/main/java/org/apache/commons/cli/MissingArgumentException.java
+index adb0e42e..36f788c7 100644
+--- a/src/main/java/org/apache/commons/cli/MissingArgumentException.java
++++ b/src/main/java/org/apache/commons/cli/MissingArgumentException.java
+@@ -28,7 +28,7 @@ public class MissingArgumentException extends ParseException {
+     private static final long serialVersionUID = -7098538588704965017L;
+ 
+     /** The option requiring additional arguments */
+-    private Option option;
++    private final Option option;
+ 
+     /**
+      * Constructs a new {@code MissingArgumentException} with the specified detail message.
+diff --git a/src/main/java/org/apache/commons/cli/MissingOptionException.java b/src/main/java/org/apache/commons/cli/MissingOptionException.java
+index 7ab19656..9f7c35ca 100644
+--- a/src/main/java/org/apache/commons/cli/MissingOptionException.java
++++ b/src/main/java/org/apache/commons/cli/MissingOptionException.java
+@@ -33,14 +33,14 @@ public class MissingOptionException extends ParseException {
+      * @param missingOptions the list of missing options and groups
+      */
+     private static String createMessage(final List<?> missingOptions) {
+-        final StringBuilder buf = new StringBuilder("Missing required option");
+-        buf.append(missingOptions.size() == 1 ? "" : "s").append(": ");
+-        final String string = missingOptions.toString();
+-        return buf.append(string.substring(1, string.length() - 1)).toString();
++        final StringBuilder messageBuilder = new StringBuilder("Missing required option");
++        messageBuilder.append(missingOptions.size() == 1 ? "" : "s").append(": ");
++        final String optionsString = missingOptions.toString();
++        return messageBuilder.append(optionsString.substring(1, optionsString.length() - 1)).toString();
+     }
+ 
+     /** The list of missing options and groups */
+-    private List missingOptions;
++    private final List missingOptions;
+ 
+     /**
+      * Constructs a new {@code MissingSelectedException} with the specified list of missing options.
