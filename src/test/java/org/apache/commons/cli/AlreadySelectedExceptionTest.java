@@ -20,6 +20,7 @@ package org.apache.commons.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,5 +38,20 @@ class AlreadySelectedExceptionTest {
         assertNotNull(new AlreadySelectedException(optionGroup, option).getMessage());
         assertEquals(option, new AlreadySelectedException(optionGroup, option).getOption());
         assertEquals(optionGroup, new AlreadySelectedException(optionGroup, option).getOptionGroup());
+    }
+
+    @Test
+    void testSetSelectedThrowsException() {
+        final Option option1 = new Option("a", "desc1");
+        final Option option2 = new Option("b", "desc2");
+        final OptionGroup optionGroup = new OptionGroup();
+        optionGroup.addOption(option1);
+        optionGroup.addOption(option2);
+
+        optionGroup.setSelected(option1);
+        final AlreadySelectedException exception = assertThrows(AlreadySelectedException.class, () -> optionGroup.setSelected(option2));
+        assertNotNull(exception.getMessage());
+        assertEquals(option2, exception.getOption());
+        assertEquals(optionGroup, exception.getOptionGroup());
     }
 }
