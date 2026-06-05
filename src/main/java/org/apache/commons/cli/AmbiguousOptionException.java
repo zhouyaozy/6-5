@@ -40,20 +40,20 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
      * @return
      */
     private static String createMessage(final String option, final Collection<String> matchingOptions) {
-        final StringBuilder buf = new StringBuilder("Ambiguous option: '");
-        buf.append(option);
-        buf.append("'  (could be: ");
-        final Iterator<String> it = matchingOptions.iterator();
-        while (it.hasNext()) {
-            buf.append(Char.APOS);
-            buf.append(it.next());
-            buf.append(Char.APOS);
-            if (it.hasNext()) {
-                buf.append(", ");
+        final StringBuilder messageBuilder = new StringBuilder("Ambiguous option: '");
+        messageBuilder.append(option);
+        messageBuilder.append("'  (could be: ");
+        final Iterator<String> iterator = matchingOptions.iterator();
+        while (iterator.hasNext()) {
+            messageBuilder.append(Char.APOS);
+            messageBuilder.append(iterator.next());
+            messageBuilder.append(Char.APOS);
+            if (iterator.hasNext()) {
+                messageBuilder.append(", ");
             }
         }
-        buf.append(")");
-        return buf.toString();
+        messageBuilder.append(")");
+        return messageBuilder.toString();
     }
 
     /** The list of options matching the partial name specified */

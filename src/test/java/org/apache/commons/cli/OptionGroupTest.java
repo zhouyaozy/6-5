@@ -141,10 +141,10 @@ class OptionGroupTest {
     void testTwoLongOptionsFromGroup() throws Exception {
         final String[] args = { "--file", "--directory" };
         final AlreadySelectedException e = assertThrows(AlreadySelectedException.class, () -> parser.parse(options, args));
-        assertNotNull(e.getOptionGroup(), "null option group");
-        assertTrue(e.getOptionGroup().isSelected());
-        assertEquals("f", e.getOptionGroup().getSelected(), "selected option");
-        assertEquals("d", e.getOption().getOpt(), "option");
+        assertNotNull(e.getSelectedGroup(), "null option group");
+        assertTrue(e.getSelectedGroup().isSelected());
+        assertEquals("f", e.getSelectedGroup().getSelected(), "selected option");
+        assertEquals("d", e.getConflictingOption().getOpt(), "option");
     }
 
     @Test
@@ -163,10 +163,10 @@ class OptionGroupTest {
     void testTwoOptionsFromGroup() throws Exception {
         final String[] args = { "-f", "-d" };
         final AlreadySelectedException e = assertThrows(AlreadySelectedException.class, () -> parser.parse(options, args));
-        assertNotNull(e.getOptionGroup(), "null option group");
-        assertTrue(e.getOptionGroup().isSelected());
-        assertEquals("f", e.getOptionGroup().getSelected(), "selected option");
-        assertEquals("d", e.getOption().getOpt(), "option");
+        assertNotNull(e.getSelectedGroup(), "null option group");
+        assertTrue(e.getSelectedGroup().isSelected());
+        assertEquals("f", e.getSelectedGroup().getSelected(), "selected option");
+        assertEquals("d", e.getConflictingOption().getOpt(), "option");
     }
 
     @Test

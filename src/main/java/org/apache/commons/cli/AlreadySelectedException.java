@@ -27,11 +27,11 @@ public class AlreadySelectedException extends ParseException {
      */
     private static final long serialVersionUID = 3674381532418544760L;
 
-    /** The option group selected. */
-    private final OptionGroup optionGroup;
+    /** The option group where another option has been selected. */
+    private final OptionGroup selectedGroup;
 
     /** The option that triggered the exception. */
-    private final Option option;
+    private final Option conflictingOption;
 
     /**
      * Constructs a new {@code AlreadySelectedException} for the specified option group.
@@ -40,9 +40,9 @@ public class AlreadySelectedException extends ParseException {
      * @param option the option that triggered the exception.
      * @since 1.2
      */
-    public AlreadySelectedException(final OptionGroup optionGroup, final Option option) {
-        this(String.format("The option '%s' was specified but an option from this group has already been selected: '%s'", option.getKey(),
-                optionGroup.getSelected()), optionGroup, option);
+    public AlreadySelectedException(final OptionGroup optionGroup, final Option conflictingOption) {
+        this(String.format("The option '%s' was specified but an option from this group has already been selected: '%s'", conflictingOption.getKey(),
+                optionGroup.getSelected()), optionGroup, conflictingOption);
     }
 
     /**
@@ -54,10 +54,10 @@ public class AlreadySelectedException extends ParseException {
         this(message, null, null);
     }
 
-    private AlreadySelectedException(final String message, final OptionGroup optionGroup, final Option option) {
+    private AlreadySelectedException(final String message, final OptionGroup selectedGroup, final Option conflictingOption) {
         super(message);
-        this.optionGroup = optionGroup;
-        this.option = option;
+        this.selectedGroup = selectedGroup;
+        this.conflictingOption = conflictingOption;
     }
 
     /**
@@ -66,8 +66,8 @@ public class AlreadySelectedException extends ParseException {
      * @return the related option.
      * @since 1.2
      */
-    public Option getOption() {
-        return option;
+    public Option getConflictingOption() {
+        return conflictingOption;
     }
 
     /**
@@ -76,7 +76,7 @@ public class AlreadySelectedException extends ParseException {
      * @return the related option group.
      * @since 1.2
      */
-    public OptionGroup getOptionGroup() {
-        return optionGroup;
+    public OptionGroup getSelectedGroup() {
+        return selectedGroup;
     }
 }

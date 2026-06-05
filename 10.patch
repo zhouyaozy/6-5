@@ -1,0 +1,157 @@
+diff --git a/src/main/java/org/apache/commons/cli/AlreadySelectedException.java b/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
+index 7603eac5..b142f122 100644
+--- a/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
++++ b/src/main/java/org/apache/commons/cli/AlreadySelectedException.java
+@@ -27,11 +27,11 @@ public class AlreadySelectedException extends ParseException {
+      */
+     private static final long serialVersionUID = 3674381532418544760L;
+ 
+-    /** The option group selected. */
+-    private final OptionGroup optionGroup;
++    /** The option group where another option has been selected. */
++    private final OptionGroup selectedGroup;
+ 
+     /** The option that triggered the exception. */
+-    private final Option option;
++    private final Option conflictingOption;
+ 
+     /**
+      * Constructs a new {@code AlreadySelectedException} for the specified option group.
+@@ -40,9 +40,9 @@ public class AlreadySelectedException extends ParseException {
+      * @param option the option that triggered the exception.
+      * @since 1.2
+      */
+-    public AlreadySelectedException(final OptionGroup optionGroup, final Option option) {
+-        this(String.format("The option '%s' was specified but an option from this group has already been selected: '%s'", option.getKey(),
+-                optionGroup.getSelected()), optionGroup, option);
++    public AlreadySelectedException(final OptionGroup optionGroup, final Option conflictingOption) {
++        this(String.format("The option '%s' was specified but an option from this group has already been selected: '%s'", conflictingOption.getKey(),
++                optionGroup.getSelected()), optionGroup, conflictingOption);
+     }
+ 
+     /**
+@@ -54,10 +54,10 @@ public class AlreadySelectedException extends ParseException {
+         this(message, null, null);
+     }
+ 
+-    private AlreadySelectedException(final String message, final OptionGroup optionGroup, final Option option) {
++    private AlreadySelectedException(final String message, final OptionGroup selectedGroup, final Option conflictingOption) {
+         super(message);
+-        this.optionGroup = optionGroup;
+-        this.option = option;
++        this.selectedGroup = selectedGroup;
++        this.conflictingOption = conflictingOption;
+     }
+ 
+     /**
+@@ -66,8 +66,8 @@ public class AlreadySelectedException extends ParseException {
+      * @return the related option.
+      * @since 1.2
+      */
+-    public Option getOption() {
+-        return option;
++    public Option getConflictingOption() {
++        return conflictingOption;
+     }
+ 
+     /**
+@@ -76,7 +76,7 @@ public class AlreadySelectedException extends ParseException {
+      * @return the related option group.
+      * @since 1.2
+      */
+-    public OptionGroup getOptionGroup() {
+-        return optionGroup;
++    public OptionGroup getSelectedGroup() {
++        return selectedGroup;
+     }
+ }
+diff --git a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+index 86cefd19..7594aa27 100644
+--- a/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
++++ b/src/main/java/org/apache/commons/cli/AmbiguousOptionException.java
+@@ -40,20 +40,20 @@ public class AmbiguousOptionException extends UnrecognizedOptionException {
+      * @return
+      */
+     private static String createMessage(final String option, final Collection<String> matchingOptions) {
+-        final StringBuilder buf = new StringBuilder("Ambiguous option: '");
+-        buf.append(option);
+-        buf.append("'  (could be: ");
+-        final Iterator<String> it = matchingOptions.iterator();
+-        while (it.hasNext()) {
+-            buf.append(Char.APOS);
+-            buf.append(it.next());
+-            buf.append(Char.APOS);
+-            if (it.hasNext()) {
+-                buf.append(", ");
++        final StringBuilder messageBuilder = new StringBuilder("Ambiguous option: '");
++        messageBuilder.append(option);
++        messageBuilder.append("'  (could be: ");
++        final Iterator<String> iterator = matchingOptions.iterator();
++        while (iterator.hasNext()) {
++            messageBuilder.append(Char.APOS);
++            messageBuilder.append(iterator.next());
++            messageBuilder.append(Char.APOS);
++            if (iterator.hasNext()) {
++                messageBuilder.append(", ");
+             }
+         }
+-        buf.append(")");
+-        return buf.toString();
++        messageBuilder.append(")");
++        return messageBuilder.toString();
+     }
+ 
+     /** The list of options matching the partial name specified */
+diff --git a/src/test/java/org/apache/commons/cli/AlreadySelectedExceptionTest.java b/src/test/java/org/apache/commons/cli/AlreadySelectedExceptionTest.java
+index 07ef961b..8185d071 100644
+--- a/src/test/java/org/apache/commons/cli/AlreadySelectedExceptionTest.java
++++ b/src/test/java/org/apache/commons/cli/AlreadySelectedExceptionTest.java
+@@ -31,11 +31,11 @@ class AlreadySelectedExceptionTest {
+     @Test
+     void testConstructor() {
+         assertEquals("a", new AlreadySelectedException("a").getMessage());
+-        assertNull(new AlreadySelectedException("a").getOption());
++        assertNull(new AlreadySelectedException("a").getConflictingOption());
+         final Option option = new Option("a", "d");
+         final OptionGroup optionGroup = new OptionGroup();
+         assertNotNull(new AlreadySelectedException(optionGroup, option).getMessage());
+-        assertEquals(option, new AlreadySelectedException(optionGroup, option).getOption());
+-        assertEquals(optionGroup, new AlreadySelectedException(optionGroup, option).getOptionGroup());
++        assertEquals(option, new AlreadySelectedException(optionGroup, option).getConflictingOption());
++        assertEquals(optionGroup, new AlreadySelectedException(optionGroup, option).getSelectedGroup());
+     }
+ }
+diff --git a/src/test/java/org/apache/commons/cli/OptionGroupTest.java b/src/test/java/org/apache/commons/cli/OptionGroupTest.java
+index 56b288b5..35577055 100644
+--- a/src/test/java/org/apache/commons/cli/OptionGroupTest.java
++++ b/src/test/java/org/apache/commons/cli/OptionGroupTest.java
+@@ -141,10 +141,10 @@ class OptionGroupTest {
+     void testTwoLongOptionsFromGroup() throws Exception {
+         final String[] args = { "--file", "--directory" };
+         final AlreadySelectedException e = assertThrows(AlreadySelectedException.class, () -> parser.parse(options, args));
+-        assertNotNull(e.getOptionGroup(), "null option group");
+-        assertTrue(e.getOptionGroup().isSelected());
+-        assertEquals("f", e.getOptionGroup().getSelected(), "selected option");
+-        assertEquals("d", e.getOption().getOpt(), "option");
++        assertNotNull(e.getSelectedGroup(), "null option group");
++        assertTrue(e.getSelectedGroup().isSelected());
++        assertEquals("f", e.getSelectedGroup().getSelected(), "selected option");
++        assertEquals("d", e.getConflictingOption().getOpt(), "option");
+     }
+ 
+     @Test
+@@ -163,10 +163,10 @@ class OptionGroupTest {
+     void testTwoOptionsFromGroup() throws Exception {
+         final String[] args = { "-f", "-d" };
+         final AlreadySelectedException e = assertThrows(AlreadySelectedException.class, () -> parser.parse(options, args));
+-        assertNotNull(e.getOptionGroup(), "null option group");
+-        assertTrue(e.getOptionGroup().isSelected());
+-        assertEquals("f", e.getOptionGroup().getSelected(), "selected option");
+-        assertEquals("d", e.getOption().getOpt(), "option");
++        assertNotNull(e.getSelectedGroup(), "null option group");
++        assertTrue(e.getSelectedGroup().isSelected());
++        assertEquals("f", e.getSelectedGroup().getSelected(), "selected option");
++        assertEquals("d", e.getConflictingOption().getOpt(), "option");
+     }
+ 
+     @Test

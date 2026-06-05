@@ -31,11 +31,11 @@ class AlreadySelectedExceptionTest {
     @Test
     void testConstructor() {
         assertEquals("a", new AlreadySelectedException("a").getMessage());
-        assertNull(new AlreadySelectedException("a").getOption());
+        assertNull(new AlreadySelectedException("a").getConflictingOption());
         final Option option = new Option("a", "d");
         final OptionGroup optionGroup = new OptionGroup();
         assertNotNull(new AlreadySelectedException(optionGroup, option).getMessage());
-        assertEquals(option, new AlreadySelectedException(optionGroup, option).getOption());
-        assertEquals(optionGroup, new AlreadySelectedException(optionGroup, option).getOptionGroup());
+        assertEquals(option, new AlreadySelectedException(optionGroup, option).getConflictingOption());
+        assertEquals(optionGroup, new AlreadySelectedException(optionGroup, option).getSelectedGroup());
     }
 }
