@@ -63,3 +63,20 @@ rect, line, polygon, polyline {
 .implements, .note.connect {
 	stroke-dasharray: 5;
 }
+
+.divider {
+	stroke: #000000;
+	stroke-width: 1;
+}
+
+.attribute {
+	font-size: 9pt;
+}
+
+.method {
+	font-size: 9pt;
+}
+
+.note {
+	font-size: 9pt;
+}

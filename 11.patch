@@ -1,0 +1,218 @@
+diff --git a/DEPLOYMENT.md b/DEPLOYMENT.md
+new file mode 100644
+index 00000000..40889df4
+--- /dev/null
++++ b/DEPLOYMENT.md
+@@ -0,0 +1,165 @@
++# Apache Commons CLI 部署说明
++
++## 概述
++
++本文档提供了 Apache Commons CLI 项目的部署指南，特别关注项目中的 SVG 图表资源文件的配置和使用。
++
++## 项目结构
++
++本项目包含以下关键文件和目录：
++
++```
++src/site/resources/images/svg/
++├── diagrams.js          # 基础图表库
++├── diagrams-cli2.js     # CLI2 特定图表定义
++├── diagrams.css         # 图表样式文件
++├── options.svg          # 选项组件架构图
++├── commandlines.svg     # 命令行组件架构图
++└── util.svg             # 实用工具资源
++```
++
++## SVG 图表文件说明
++
++### 1. diagrams-cli2.js
++该文件定义了 Apache Commons CLI2 库中各种类和接口的可视化表示：
++
++- **接口定义**：Option, Group, Parent, Argument, CommandLine, WriteableCommandLine
++- **类定义**：
++  - 选项类：PropertyOption, DefaultOption, Command, Switch, SourceDestArgument
++  - 解析类：Parser, DefaultingCommandLine, PropertiesCommandLine, PreferencesCommandLine
++  - 构建器：ArgumentBuilder, CommandBuilder, DefaultOptionBuilder, GroupBuilder, PatternBuilder, SwitchBuilder
++  - 验证器：Validator, ClassValidator, DateValidator, EnumValidator, FileValidator, UrlValidator
++  - 工具类：Comparators, HelpFormatter
++
++### 2. diagrams.css
++该文件为 SVG 图表提供样式配置，包括：
++
++- 颜色主题：
++  - option: 青色 (191,255,255)
++  - group: 红色 (255,191,191)
++  - parent: 绿色 (191,255,191)
++  - argument: 蓝色 (191,191,255)
++  - property: 紫色 (255,191,255)
++  - package: 黄色 (255,255,191)
++
++- 线条样式：边框、连接线、虚线等
++
++### 3. SVG 图表文件
++- `options.svg`：显示 CLI2 选项相关组件的架构图
++- `commandlines.svg`：显示 CLI2 命令行相关组件的架构图
++
++## 部署步骤
++
++### 前置条件
++
++1. **Java 环境**：JDK 1.8 或更高版本
++2. **构建工具**：Apache Maven 3.x 或更高版本
++
++### 本地构建与测试
++
++1. **克隆项目**
++   ```bash
++   git clone https://gitbox.apache.org/repos/asf/commons-cli.git
++   cd commons-cli
++   ```
++
++2. **构建项目**
++   ```bash
++   mvn clean verify
++   ```
++
++3. **生成站点文档**
++   ```bash
++   mvn site
++   ```
++
++### SVG 图表的使用与部署
++
++#### 1. 本地查看 SVG 图表
++
++- 直接在浏览器中打开以下文件：
++  - `src/site/resources/images/svg/options.svg`
++  - `src/site/resources/images/svg/commandlines.svg`
++
++- 这些 SVG 文件会自动加载 `diagrams.js`、`diagrams-cli2.js` 和 `diagrams.css`
++
++#### 2. 部署到网站
++
++SVG 图表已配置为与 Maven Site 插件一起使用，部署步骤如下：
++
++1. **确保资源路径正确**
++   - SVG 文件应放置在 `src/site/resources/images/svg/` 目录下
++   - 相关的 JS 和 CSS 文件应与 SVG 文件在同一目录中
++
++2. **生成并部署站点**
++   ```bash
++   # 完整构建（包括站点生成）
++   mvn clean verify site
++   
++   # 仅生成站点
++   mvn site
++   ```
++
++3. **站点部署配置**
++   
++   在 `pom.xml` 中已配置好站点部署设置：
++   ```xml
++   <distributionManagement>
++     <site>
++       <id>apache.website</id>
++       <name>Apache Commons Site</name>
++       <url>scm:svn:${commons.scmPubUrl}</url>
++     </site>
++   </distributionManagement>
++   ```
++
++## 配置注意事项
++
++### 1. 文件依赖关系
++
++SVG 图表文件依赖于同级目录下的 JS 和 CSS 文件，确保部署时：
++- 所有文件保持在同一目录结构中
++- 相对路径引用正确
++
++### 2. 浏览器兼容性
++
++- SVG 图表使用 ECMAScript，现代浏览器均支持
++- 建议使用最新版本的 Chrome、Firefox、Safari 或 Edge 浏览器
++
++### 3. Maven Site 配置
++
++项目使用 Apache Maven Site Plugin 生成文档站点，相关配置在 `pom.xml` 和 `src/site/site.xml` 中。
++
++## 故障排除
++
++### 问题 1：SVG 图表无法显示
++- **检查**：JS 和 CSS 文件是否与 SVG 文件在同一目录
++- **解决**：确保所有依赖文件一同部署
++
++### 问题 2：图表样式丢失
++- **检查**：`diagrams.css` 文件是否正确加载
++- **解决**：验证 SVG 文件中的样式表引用路径
++
++### 问题 3：图表内容为空
++- **检查**：JavaScript 是否被浏览器禁用
++- **解决**：启用浏览器的 JavaScript 支持
++
++## 维护与更新
++
++### 更新图表样式
++
++如需修改图表颜色或样式，编辑 `src/site/resources/images/svg/diagrams.css` 文件。
++
++### 更新图表内容
++
++如需添加新的组件或修改现有组件的可视化表示，编辑 `src/site/resources/images/svg/diagrams-cli2.js` 文件。
++
++## 相关链接
++
++- [Apache Commons CLI 主页](https://commons.apache.org/proper/commons-cli/)
++- [Apache Commons CLI Javadoc](https://commons.apache.org/proper/commons-cli/apidocs/)
++- [项目 GitHub 仓库](https://github.com/apache/commons-cli)
++
++## 许可证
++
++Apache License, Version 2.0
+diff --git a/src/site/resources/images/svg/diagrams-cli2.js b/src/site/resources/images/svg/diagrams-cli2.js
+index 38efec58..076a12f8 100644
+--- a/src/site/resources/images/svg/diagrams-cli2.js
++++ b/src/site/resources/images/svg/diagrams-cli2.js
+@@ -168,17 +168,6 @@ DefaultOptionBuilder.addAttribute("shortPrefix");
+ DefaultOptionBuilder.addAttribute("longPrefix");
+ DefaultOptionBuilder.addAttribute("burstEnabled");
+ 
+-var DefaultOptionBuilder = new Class("DefaultOptionBuilder");
+-DefaultOptionBuilder.addMethod("withId(...)");
+-DefaultOptionBuilder.addMethod("withShortName(...)");
+-DefaultOptionBuilder.addMethod("withLongName(...)");
+-DefaultOptionBuilder.addMethod("withDescription(...)");
+-DefaultOptionBuilder.addMethod("withArgument(...)");
+-DefaultOptionBuilder.addMethod("withChildren(...)");
+-DefaultOptionBuilder.addMethod("withRequired(...)");
+-DefaultOptionBuilder.addMethod("create()");
+-DefaultOptionBuilder.addMethod("reset()");
+-
+ var GroupBuilder = new Class("GroupBuilder");
+ GroupBuilder.addMethod("withName(...)");
+ GroupBuilder.addMethod("withDescription(...)");
+diff --git a/src/site/resources/images/svg/diagrams.css b/src/site/resources/images/svg/diagrams.css
+index fc1426fb..f7576e53 100644
+--- a/src/site/resources/images/svg/diagrams.css
++++ b/src/site/resources/images/svg/diagrams.css
+@@ -63,3 +63,20 @@ rect, line, polygon, polyline {
+ .implements, .note.connect {
+ 	stroke-dasharray: 5;
+ }
++
++.divider {
++	stroke: #000000;
++	stroke-width: 1;
++}
++
++.attribute {
++	font-size: 9pt;
++}
++
++.method {
++	font-size: 9pt;
++}
++
++.note {
++	font-size: 9pt;
++}
