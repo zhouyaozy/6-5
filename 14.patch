@@ -1,0 +1,425 @@
+diff --git a/src/site/resources/images/svg/diagrams-cli2.js b/src/site/resources/images/svg/diagrams-cli2.js
+index 38efec58..565c685b 100644
+--- a/src/site/resources/images/svg/diagrams-cli2.js
++++ b/src/site/resources/images/svg/diagrams-cli2.js
+@@ -168,17 +168,6 @@ DefaultOptionBuilder.addAttribute("shortPrefix");
+ DefaultOptionBuilder.addAttribute("longPrefix");
+ DefaultOptionBuilder.addAttribute("burstEnabled");
+ 
+-var DefaultOptionBuilder = new Class("DefaultOptionBuilder");
+-DefaultOptionBuilder.addMethod("withId(...)");
+-DefaultOptionBuilder.addMethod("withShortName(...)");
+-DefaultOptionBuilder.addMethod("withLongName(...)");
+-DefaultOptionBuilder.addMethod("withDescription(...)");
+-DefaultOptionBuilder.addMethod("withArgument(...)");
+-DefaultOptionBuilder.addMethod("withChildren(...)");
+-DefaultOptionBuilder.addMethod("withRequired(...)");
+-DefaultOptionBuilder.addMethod("create()");
+-DefaultOptionBuilder.addMethod("reset()");
+-
+ var GroupBuilder = new Class("GroupBuilder");
+ GroupBuilder.addMethod("withName(...)");
+ GroupBuilder.addMethod("withDescription(...)");
+@@ -234,10 +223,10 @@ FileValidator.addAttribute("hidden");
+ FileValidator.addAttribute("readable");
+ FileValidator.addAttribute("writable");
+ 
+-var FileValidator = new Class("FileValidator");
+-FileValidator.addAttribute("format");
+-FileValidator.addAttribute("minimum");
+-FileValidator.addAttribute("maximum");
++var NumberValidator = new Class("NumberValidator");
++NumberValidator.addAttribute("format");
++NumberValidator.addAttribute("minimum");
++NumberValidator.addAttribute("maximum");
+ 
+ var UrlValidator = new Class("UrlValidator");
+ UrlValidator.addAttribute("format");
+diff --git a/src/site/resources/images/svg/diagrams.css b/src/site/resources/images/svg/diagrams.css
+index fc1426fb..ef6d02a0 100644
+--- a/src/site/resources/images/svg/diagrams.css
++++ b/src/site/resources/images/svg/diagrams.css
+@@ -16,24 +16,27 @@
+  */
+  
+ .option .outline, .option polygon.note {
+-	fill:rgb(191,255,255);
++	fill: rgb(191,255,255);
+ }
++
+ .group rect.outline, .group polygon.note {
+-	fill:rgb(255,191,191);
++	fill: rgb(255,191,191);
+ }
+ 
+ .parent rect.outline, .parent polygon.note {
+-	fill:rgb(191,255,191);
++	fill: rgb(191,255,191);
+ }
++
+ .argument rect.outline, .argument polygon.note {
+-	fill:rgb(191,191,255);
++	fill: rgb(191,191,255);
+ }
++
+ .property rect.outline, .property polygon.note {
+-	fill:rgb(255,191,255);
++	fill: rgb(255,191,255);
+ }
+ 
+ .package rect {
+-	fill:rgb(255,255,191);
++	fill: rgb(255,255,191);
+ }
+ 
+ .package rect.inner {
+@@ -43,23 +46,40 @@
+ 
+ text.title {
+ 	text-anchor: middle;
++	font-weight: bold;
++}
++
++text.attribute, text.method, text.note {
++	font-family: monospace;
++	font-size: 10px;
+ }
+ 
+ .type text {
+ 	fill: rgb(0,0,0);
+ }
++
+ rect, line, polygon, polyline {
+-	stroke:rgb(0,0,0);
+-	stroke-width:2;
++	stroke: rgb(0,0,0);
++	stroke-width: 2;
+ 	stroke-linejoin: bevel;
+ 	stroke-linecap: round;
+ }
+ 
+-.implements, .extends {
++.implements {
+ 	fill: none;
+-	marker-end: url(util.svg#HollowArrow); 
++	stroke-dasharray: 5;
++	marker-end: url(util.svg#HollowArrow);
++}
++
++.extends {
++	fill: none;
++	marker-end: url(util.svg#FilledArrow);
+ }
+ 
+-.implements, .note.connect {
++.note.connect {
+ 	stroke-dasharray: 5;
+ }
++
++line.divider {
++	stroke-width: 1;
++}
+diff --git a/src/site/site.xml b/src/site/site.xml
+index 0d8b667e..00844c99 100644
+--- a/src/site/site.xml
++++ b/src/site/site.xml
+@@ -51,5 +51,8 @@
+       <item name="Javadoc"            href="/apidocs/index.html"/>
+       <item name="Javadoc Archive"    href="https://javadoc.io/doc/commons-cli/commons-cli/latest/index.html"/>
+     </menu>
++    <menu name="Development">
++      <item name="Deployment Guide"   href="deployment.html" />
++    </menu>
+   </body>
+ </site>
+diff --git a/src/site/xdoc/deployment.xml b/src/site/xdoc/deployment.xml
+new file mode 100644
+index 00000000..b7de08f8
+--- /dev/null
++++ b/src/site/xdoc/deployment.xml
+@@ -0,0 +1,284 @@
++<?xml version="1.0"?>
++<!--
++  Licensed to the Apache Software Foundation (ASF) under one
++  or more contributor license agreements.  See the NOTICE file
++  distributed with this work for additional information
++  regarding copyright ownership.  The ASF licenses this file
++  to you under the Apache License, Version 2.0 (the
++  "License"); you may not use this file except in compliance
++  with the License.  You may obtain a copy of the License at
++
++  https://www.apache.org/licenses/LICENSE-2.0
++
++  Unless required by applicable law or agreed to in writing,
++  software distributed under the License is distributed on an
++  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++  KIND, either express or implied.  See the License for the
++  specific language governing permissions and limitations
++  under the License.
++-->
++<document xmlns="http://maven.apache.org/XDOC/2.0"
++  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 https://maven.apache.org/xsd/xdoc-2.0.xsd">
++  <properties>
++    <title>Apache Commons CLI 部署说明</title>
++    <author email="dev@commons.apache.org">Apache Commons Team</author>
++  </properties>
++
++  <body>
++    <section name="项目概述">
++      <p>
++        Apache Commons CLI 是一个 Java 命令行解析库，提供命令行选项的呈现、处理和验证功能。
++        本项目采用 Maven 构建，站点通过 Maven Site Plugin 生成静态 HTML 文档，
++        最终通过 SVN 发布到 Apache 官方网站 (<code>https://commons.apache.org/proper/commons-cli/</code>)。
++      </p>
++    </section>
++
++    <section name="SVG 图表系统架构">
++      <p>
++        项目站点包含一套基于 SVG + JavaScript 的 UML 类图渲染系统，用于可视化展示 CLI2 API 的类层次结构。
++        该系统由以下核心文件组成，均位于 <code>src/site/resources/images/svg/</code> 目录下：
++      </p>
++
++      <subsection name="文件清单与职责">
++        <table>
++          <caption>SVG 图表系统文件清单</caption>
++          <tr>
++            <th>文件</th>
++            <th>类型</th>
++            <th>职责</th>
++          </tr>
++          <tr>
++            <td><code>diagrams.js</code></td>
++            <td>JavaScript 渲染引擎</td>
++            <td>核心渲染库，定义了 Type、Interface、Class、PackageSymbol 等基础类，负责在 SVG 中动态创建 UML 图元（矩形、文本、分隔线、注释框等）</td>
++          </tr>
++          <tr>
++            <td><code>diagrams-cli2.js</code></td>
++            <td>JavaScript 数据定义</td>
++            <td>CLI2 API 的类模型定义，声明了所有接口（Interface）、类（Class）及其属性（Attribute）、方法（Method）和注释（Note）。包含 Option、Group、Parser、Validator 等核心类型</td>
++          </tr>
++          <tr>
++            <td><code>diagrams.css</code></td>
++            <td>CSS 样式表</td>
++            <td>图表样式定义，控制各类型节点的填充色、边框样式、继承/实现关系线的箭头样式和虚线样式</td>
++          </tr>
++          <tr>
++            <td><code>util.svg</code></td>
++            <td>SVG 标记定义</td>
++            <td>定义箭头标记（FilledArrow 实心箭头用于 extends 关系、HollowArrow 空心箭头用于 implements 关系）</td>
++          </tr>
++          <tr>
++            <td><code>options.svg</code></td>
++            <td>SVG 图表实例</td>
++            <td>Options 包结构图，展示 Option 体系中的接口和实现类关系</td>
++          </tr>
++          <tr>
++            <td><code>commandlines.svg</code></td>
++            <td>SVG 图表实例</td>
++            <td>CommandLine 包结构图，展示命令行解析与执行相关的类关系</td>
++          </tr>
++        </table>
++      </subsection>
++
++      <subsection name="渲染流程">
++        <p>SVG 图表的渲染遵循以下流程：</p>
++        <ol>
++          <li>浏览器加载 SVG 文件（如 <code>options.svg</code>）</li>
++          <li>通过 <code>&lt;script&gt;</code> 标签依次加载 <code>diagrams.js</code>（渲染引擎）和 <code>diagrams-cli2.js</code>（CLI2 类定义）</li>
++          <li>通过 <code>&lt;?xml-stylesheet?&gt;</code> 处理指令加载 <code>diagrams.css</code>（样式）</li>
++          <li>SVG 中的 <code>&lt;g onload="..."&gt;</code> 元素触发 JavaScript 构造函数</li>
++          <li>每个 <code>new Class("...")</code> 或 <code>new Interface("...")</code> 实例调用其 <code>insert(evt)</code> 方法</li>
++          <li><code>insert()</code> 方法动态创建 SVG DOM 元素（矩形、文本、线条、多边形等），完成图表的客户端渲染</li>
++        </ol>
++      </subsection>
++
++      <subsection name="样式设计规范">
++        <p>
++          各类型节点的颜色编码如下（定义于 <code>diagrams.css</code>）：
++        </p>
++        <table>
++          <caption>节点颜色编码</caption>
++          <tr><th>CSS 选择器</th><th>类型</th><th>填充色</th><th>说明</th></tr>
++          <tr><td><code>.option</code></td><td>接口/选项</td><td>浅青色 rgb(191,255,255)</td><td>Option 接口及其实现</td></tr>
++          <tr><td><code>.group</code></td><td>组</td><td>浅红色 rgb(255,191,191)</td><td>Group 接口</td></tr>
++          <tr><td><code>.parent</code></td><td>父类型</td><td>浅绿色 rgb(191,255,191)</td><td>Parent 接口的实现类</td></tr>
++          <tr><td><code>.argument</code></td><td>参数</td><td>浅蓝色 rgb(191,191,255)</td><td>Argument 接口及其实现</td></tr>
++          <tr><td><code>.property</code></td><td>属性</td><td>浅紫色 rgb(255,191,255)</td><td>Property 相关类型</td></tr>
++          <tr><td><code>.package</code></td><td>包</td><td>浅黄色 rgb(255,255,191)</td><td>包容器</td></tr>
++        </table>
++        <p>
++          关系线样式：
++        </p>
++        <ul>
++          <li><code>.implements</code> — 虚线 + 空心箭头（HollowArrow），表示接口实现关系</li>
++          <li><code>.extends</code> — 实线 + 实心箭头（FilledArrow），表示类继承关系</li>
++          <li><code>.note.connect</code> — 虚线，表示注释连接线</li>
++        </ul>
++      </subsection>
++    </section>
++
++    <section name="构建与部署流程">
++      <subsection name="环境要求">
++        <ul>
++          <li>Java JDK 1.8+</li>
++          <li>Apache Maven 3.x</li>
++          <li>SVN 客户端（用于站点发布）</li>
++        </ul>
++      </subsection>
++
++      <subsection name="本地构建">
++        <p>在项目根目录执行以下命令进行完整构建：</p>
++        <source>mvn</source>
++        <p>
++          默认目标（定义于 <code>pom.xml</code> 的 <code>&lt;defaultGoal&gt;</code>）为：
++        </p>
++        <source>clean verify apache-rat:check japicmp:cmp checkstyle:check spotbugs:check pmd:check javadoc:javadoc</source>
++        <p>仅编译和运行测试：</p>
++        <source>mvn clean test</source>
++        <p>生成站点文档（包含 SVG 图表）：</p>
++        <source>mvn clean site</source>
++        <p>查看代码覆盖率报告：</p>
++        <source>mvn clean site -Dcommons.jacoco.haltOnFailure=false -Pjacoco</source>
++      </subsection>
++
++      <subsection name="站点部署">
++        <p>
++          站点部署通过 <code>maven-scm-publish-plugin</code> 插件将生成的静态站点内容发布到 Apache SVN 仓库。
++          部署目标地址定义在 <code>pom.xml</code> 的 <code>&lt;distributionManagement&gt;</code> 中：
++        </p>
++        <source>scm:svn:https://svn.apache.org/repos/infra/websites/production/commons/content/proper/commons-cli</source>
++        <p>部署命令：</p>
++        <source>mvn clean site scm-publish:publish-scm</source>
++
++        <p>
++          <b>SVG 图表文件的部署路径映射：</b>
++        </p>
++        <table>
++          <caption>SVG 文件部署路径映射</caption>
++          <tr><th>源文件路径</th><th>部署后相对路径</th></tr>
++          <tr><td><code>src/site/resources/images/svg/diagrams.js</code></td><td><code>images/svg/diagrams.js</code></td></tr>
++          <tr><td><code>src/site/resources/images/svg/diagrams-cli2.js</code></td><td><code>images/svg/diagrams-cli2.js</code></td></tr>
++          <tr><td><code>src/site/resources/images/svg/diagrams.css</code></td><td><code>images/svg/diagrams.css</code></td></tr>
++          <tr><td><code>src/site/resources/images/svg/util.svg</code></td><td><code>images/svg/util.svg</code></td></tr>
++          <tr><td><code>src/site/resources/images/svg/options.svg</code></td><td><code>images/svg/options.svg</code></td></tr>
++          <tr><td><code>src/site/resources/images/svg/commandlines.svg</code></td><td><code>images/svg/commandlines.svg</code></td></tr>
++        </table>
++
++        <p>
++          <b>RC 发布候选版本部署：</b>使用 <code>rc</code> profile 可将站点部署到临时暂存区：
++        </p>
++        <source>mvn clean site scm-publish:publish-scm -Prc</source>
++        <p>
++          此时站点将部署到个人 Apache 构建空间：
++          <code>https://people.apache.org/www/people.apache.org/builds/commons/cli/{version}/RC1/site</code>
++        </p>
++      </subsection>
++    </section>
++
++    <section name="SVG 图表维护指南">
++      <subsection name="添加新的类定义">
++        <p>
++          在 <code>diagrams-cli2.js</code> 中添加新类时，需遵循以下模式：
++        </p>
++        <source><![CDATA[
++var MyClass = new Class("MyClass");
++MyClass.addAttribute("attributeName");
++MyClass.addMethod("methodName(...)");
++MyClass.addNote("usage example");
++]]></source>
++        <p>对于接口（Interface），使用相同的模式，但将 <code>Class</code> 替换为 <code>Interface</code>：</p>
++        <source><![CDATA[
++var MyInterface = new Interface("MyInterface");
++MyInterface.addMethod("requiredMethod(...)");
++]]></source>
++      </subsection>
++
++      <subsection name="添加新的图表文件">
++        <p>
++          创建新的 SVG 图表文件时，需遵循以下模板：
++        </p>
++        <source><![CDATA[
++<?xml version="1.0" standalone="no"?>
++<?xml-stylesheet type="text/css" href="diagrams.css" ?>
++<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
++  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
++<svg id="root" width="800" height="600" x="0" y="0">
++  <script type="text/ecmascript" xlink:href="diagrams.js"/>
++  <script type="text/ecmascript" xlink:href="diagrams-cli2.js"/>
++  <script type="text/ecmascript">
++    displayAttributes = false;
++    displayMethods = false;
++  </script>
++  <!-- 在此处定义图表布局 -->
++</svg>
++]]></source>
++      </subsection>
++
++      <subsection name="修改样式">
++        <p>
++          修改 <code>diagrams.css</code> 时请注意：
++        </p>
++        <ul>
++          <li>颜色值使用 <code>rgb(r,g,b)</code> 格式以保持一致性</li>
++          <li>继承关系使用 <code>.extends</code> 选择器（实心箭头）</li>
++          <li>实现关系使用 <code>.implements</code> 选择器（空心箭头 + 虚线）</li>
++          <li>分隔线使用 <code>line.divider</code> 选择器（细线）</li>
++        </ul>
++      </subsection>
++
++      <subsection name="验证图表渲染">
++        <p>
++          构建站点后，可在本地验证 SVG 图表是否正确渲染：
++        </p>
++        <ol>
++          <li>执行 <code>mvn clean site</code> 生成站点</li>
++          <li>打开 <code>target/site/images/svg/options.svg</code> 或 <code>commandlines.svg</code></li>
++          <li>使用支持 SVG 和 JavaScript 的浏览器（如 Chrome、Firefox）查看</li>
++          <li>检查所有类框是否完整显示、关系线是否正确连接</li>
++        </ol>
++        <p>
++          <b>注意：</b>SVG 图表依赖 JavaScript 在浏览器端动态渲染，直接在文件系统中打开文件时，
++          JavaScript 可能因跨域限制无法加载外部脚本。推荐通过 <code>mvn site:run</code> 
++          启动本地服务器后访问 <code>http://localhost:8080/images/svg/options.svg</code> 进行验证。
++        </p>
++      </subsection>
++    </section>
++
++    <section name="CI/CD 流水线">
++      <p>
++        项目使用 GitHub Actions 进行持续集成，工作流定义在 <code>.github/workflows/</code> 目录下：
++      </p>
++      <table>
++        <caption>CI/CD 工作流</caption>
++        <tr><th>工作流文件</th><th>用途</th></tr>
++        <tr><td><code>maven.yml</code></td><td>Java CI — 构建、测试、代码质量检查</td></tr>
++        <tr><td><code>codeql-analysis.yml</code></td><td>CodeQL 安全代码扫描</td></tr>
++        <tr><td><code>scorecards-analysis.yml</code></td><td>OpenSSF 安全评分卡分析</td></tr>
++        <tr><td><code>dependency-review.yml</code></td><td>依赖项审查</td></tr>
++      </table>
++      <p>
++        站点部署目前通过手动触发 <code>mvn scm-publish:publish-scm</code> 完成，
++        由 Apache Commons PMC 成员在发布流程中执行。
++      </p>
++    </section>
++
++    <section name="常见问题">
++      <subsection name="SVG 图表无法正常显示">
++        <ul>
++          <li>确认 <code>diagrams.js</code> 和 <code>diagrams-cli2.js</code> 文件路径正确且可访问</li>
++          <li>确认 <code>diagrams.css</code> 和 <code>util.svg</code> 在同一目录下</li>
++          <li>检查浏览器控制台是否有 JavaScript 错误</li>
++          <li>确认 SVG 文件中的 <code>displayAttributes</code> / <code>displayMethods</code> 设置正确</li>
++        </ul>
++      </subsection>
++      <subsection name="站点部署后资源 404">
++        <ul>
++          <li>确认 <code>src/site/resources/</code> 下的文件已正确复制到 <code>target/site/</code></li>
++          <li>检查 <code>.htaccess</code> 文件是否有正确的 MIME 类型映射</li>
++          <li>确认 SVN 发布时没有遗漏文件</li>
++        </ul>
++      </subsection>
++    </section>
++  </body>
++</document>
+\ No newline at end of file

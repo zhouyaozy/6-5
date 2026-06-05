@@ -16,24 +16,27 @@
  */
  
 .option .outline, .option polygon.note {
-	fill:rgb(191,255,255);
+	fill: rgb(191,255,255);
 }
+
 .group rect.outline, .group polygon.note {
-	fill:rgb(255,191,191);
+	fill: rgb(255,191,191);
 }
 
 .parent rect.outline, .parent polygon.note {
-	fill:rgb(191,255,191);
+	fill: rgb(191,255,191);
 }
+
 .argument rect.outline, .argument polygon.note {
-	fill:rgb(191,191,255);
+	fill: rgb(191,191,255);
 }
+
 .property rect.outline, .property polygon.note {
-	fill:rgb(255,191,255);
+	fill: rgb(255,191,255);
 }
 
 .package rect {
-	fill:rgb(255,255,191);
+	fill: rgb(255,255,191);
 }
 
 .package rect.inner {
@@ -43,23 +46,40 @@
 
 text.title {
 	text-anchor: middle;
+	font-weight: bold;
+}
+
+text.attribute, text.method, text.note {
+	font-family: monospace;
+	font-size: 10px;
 }
 
 .type text {
 	fill: rgb(0,0,0);
 }
+
 rect, line, polygon, polyline {
-	stroke:rgb(0,0,0);
-	stroke-width:2;
+	stroke: rgb(0,0,0);
+	stroke-width: 2;
 	stroke-linejoin: bevel;
 	stroke-linecap: round;
 }
 
-.implements, .extends {
+.implements {
 	fill: none;
-	marker-end: url(util.svg#HollowArrow); 
+	stroke-dasharray: 5;
+	marker-end: url(util.svg#HollowArrow);
 }
 
-.implements, .note.connect {
+.extends {
+	fill: none;
+	marker-end: url(util.svg#FilledArrow);
+}
+
+.note.connect {
 	stroke-dasharray: 5;
+}
+
+line.divider {
+	stroke-width: 1;
 }
