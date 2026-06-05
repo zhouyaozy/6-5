@@ -63,3 +63,14 @@ rect, line, polygon, polyline {
 .implements, .note.connect {
 	stroke-dasharray: 5;
 }
+
+.validation-error .outline {
+	fill: rgb(255,230,230);
+	stroke: rgb(204,0,0);
+	stroke-width: 3;
+}
+
+.validation-error-text {
+	fill: rgb(204,0,0);
+	font-weight: bold;
+}

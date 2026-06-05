@@ -24,11 +24,39 @@ var displayAttributes = true;
 var displayMethods = true;
 var displayNotes = true;
 
+function validateParam(paramName, value, rules) {
+	if (rules.required && (value === undefined || value === null || value === "")) {
+		console.error("Parameter validation error: '" + paramName + "' is required but received: " + value);
+		return false;
+	}
+	if (rules.type && value !== undefined && value !== null && typeof value !== rules.type) {
+		console.error("Parameter validation error: '" + paramName + "' expected type '" + rules.type + "' but received: " + typeof value);
+		return false;
+	}
+	if (rules.minValue !== undefined && typeof value === "number" && value < rules.minValue) {
+		console.error("Parameter validation error: '" + paramName + "' minimum value is " + rules.minValue + " but received: " + value);
+		return false;
+	}
+	return true;
+}
+
 function Type(name){
 	this.width = 160;
 	this.style = "type";
+	this.errors = [];
+	if (!validateParam("name", name, {required: true, type: "string"})) {
+		this.errors.push("Invalid constructor parameter 'name': " + name);
+	}
 	
 	this.insert = function(evt){
+		if (!validateParam("evt", evt, {required: true}) || !evt || !validateParam("evt.target", evt.target, {required: true})) {
+			console.error("Parameter validation error: 'insert' requires a valid event with target property");
+			return;
+		}
+		if (this.errors.length > 0) {
+			this.insertErrorDisplay(evt);
+			return;
+		}
 		y = 0;
 		y = this.insertOutline(evt,y);
 		y = this.insertName(evt,y);
@@ -40,6 +68,38 @@ function Type(name){
 		}
 		if(displayNotes==true){
 			y = this.insertNotes(evt,y);
+		}
+	}
+
+	this.insertErrorDisplay = function(evt){
+		style = evt.target.getAttributeNS(null, "class");
+		evt.target.setAttributeNS(null,"class",style+" "+this.style+" validation-error");
+
+		e = document.createElementNS(namespace, "rect");
+		e.setAttributeNS(null, "x", 0);
+		e.setAttributeNS(null, "y", 0);
+		e.setAttributeNS(null, "width", this.width);
+		e.setAttributeNS(null, "height", padding * 2 + textHeight + this.errors.length * textHeight);
+		e.setAttributeNS(null, "class", "outline validation-error");
+		evt.target.appendChild(e);
+
+		y = padding + textHeight;
+		e = document.createElementNS(namespace, "text");
+		e.setAttributeNS(null, "x", this.width/2);
+		e.setAttributeNS(null, "y", y);
+		e.setAttributeNS(null, "class", "title validation-error-text");
+		e.appendChild(document.createTextNode(this.name || "Unknown"));
+		evt.target.appendChild(e);
+
+		y += padding;
+		for (i = 0; i < this.errors.length; ++i) {
+			y += textHeight;
+			e = document.createElementNS(namespace, "text");
+			e.setAttributeNS(null, "x", padding);
+			e.setAttributeNS(null, "y", y);
+			e.setAttributeNS(null, "class", "validation-error-text");
+			e.appendChild(document.createTextNode(this.errors[i]));
+			evt.target.appendChild(e);
 		}
 	}
 	
@@ -115,6 +175,10 @@ function Type(name){
 	this.attributeCount = 0;
 	
 	this.addAttribute = function(text){
+		if (!validateParam("text", text, {required: true, type: "string"})) {
+			this.errors.push("Invalid addAttribute parameter 'text': " + text);
+			return;
+		}
 		this.attributeList[this.attributeCount++]=text;
 	}
 	
@@ -165,6 +229,10 @@ function Type(name){
 	this.methodCount = 0;
 	
 	this.addMethod = function(text){
+		if (!validateParam("text", text, {required: true, type: "string"})) {
+			this.errors.push("Invalid addMethod parameter 'text': " + text);
+			return;
+		}
 		this.methodList[this.methodCount++]=text;
 	}
 	
@@ -215,6 +283,10 @@ function Type(name){
 	this.noteCount = 0;
 	
 	this.addNote = function(text){
+		if (!validateParam("text", text, {required: true, type: "string"})) {
+			this.errors.push("Invalid addNote parameter 'text': " + text);
+			return;
+		}
 		this.noteList[this.noteCount++]=text;
 	}
 	
@@ -316,12 +388,30 @@ Class.prototype = new Type;
 
 
 function PackageSymbol(name,width,height){
+	this.errors = [];
+	if (!validateParam("name", name, {required: true, type: "string"})) {
+		this.errors.push("Invalid constructor parameter 'name': " + name);
+	}
+	if (!validateParam("width", width, {required: true, type: "number", minValue: 1})) {
+		this.errors.push("Invalid constructor parameter 'width': " + width);
+	}
+	if (!validateParam("height", height, {required: true, type: "number", minValue: 1})) {
+		this.errors.push("Invalid constructor parameter 'height': " + height);
+	}
 	this.name = name;
 	this.nameWidth = 150;
 	this.width = width;
 	this.height = height;
 	
 	this.insert = function(evt){
+		if (!validateParam("evt", evt, {required: true}) || !evt || !validateParam("evt.target", evt.target, {required: true})) {
+			console.error("Parameter validation error: PackageSymbol 'insert' requires a valid event with target property");
+			return;
+		}
+		if (this.errors.length > 0) {
+			console.error("PackageSymbol '" + (this.name || "Unknown") + "' has validation errors: " + this.errors.join("; "));
+			return;
+		}
 		
 		style = evt.target.getAttributeNS(null, "class");
 		evt.target.setAttributeNS(null,"class",style+" package");
