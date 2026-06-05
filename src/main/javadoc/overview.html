@@ -148,10 +148,8 @@ limitations under the License.
         </p>
         <pre><code>
 // create Options object
-Options options = new Options();
-
-// add t option
-options.addOption("t", false, "display current time");
+Options options = new Options()
+    .addOption("t", false, "display current time");
         </code></pre>
           <p>
             The <code>addOption</code> method has three parameters.  The first
@@ -322,7 +320,7 @@ Option find = Option.builder("find")
           The last option to create is the Java property, and it is also created
           using the Option class' Builder.
         </p>
-        <code>Option property  = Option property  = Option.builder("D")
+        <code>Option property = Option.builder("D")
                                 .hasArgs()
                                 .valueSeparator('=')
                                 .build();</code>
@@ -342,21 +340,20 @@ Option find = Option.builder("find")
           <a href="javadocs/api-release/org/apache/commons/cli/CommandLine.html#addOption(org.apache.commons.cli.Option)">addOption</a>
           method of <code>Options</code>.
         </p>
-        <pre><code>Options options = new Options();
-
-options.addOption(help);
-options.addOption(projecthelp);
-options.addOption(version);
-options.addOption(quiet);
-options.addOption(verbose);
-options.addOption(debug);
-options.addOption(emacs);
-options.addOption(logfile);
-options.addOption(logger);
-options.addOption(listener);
-options.addOption(buildfile);
-options.addOption(find);
-options.addOption(property);</code></pre>
+        <pre><code>Options options = new Options()
+    .addOption(help)
+    .addOption(projecthelp)
+    .addOption(version)
+    .addOption(quiet)
+    .addOption(verbose)
+    .addOption(debug)
+    .addOption(emacs)
+    .addOption(logfile)
+    .addOption(logger)
+    .addOption(listener)
+    .addOption(buildfile)
+    .addOption(find)
+    .addOption(property);</code></pre>
         <p>
           All the preparation is now complete, and we are now ready to
           parse the command line arguments.
@@ -460,22 +457,22 @@ Sort entries alphabetically if none of -cftuSUX nor --sort.
 CommandLineParser parser = new DefaultParser();
 
 // create the Options
-Options options = new Options();
-options.addOption("a", "all", false, "do not hide entries starting with .");
-options.addOption("A", "almost-all", false, "do not list implied . and ..");
-options.addOption("b", "escape", false, "print octal escapes for non-graphic "
-                                         + "characters");
-options.addOption(Option.builder("SIZE").longOpt("block-size")
-                                .desc("use SIZE-byte blocks")
-                                .hasArg()
-                                .build());
-options.addOption("B", "ignore-backups", false, "do not list implied entries "
-                                                 + "ending with ~");
-options.addOption("c", false, "with -lt: sort by, and show, ctime (time of last " 
-                               + "modification of file status information) with "
-                               + "-l:show ctime and sort by name otherwise: sort "
-                               + "by ctime");
-options.addOption("C", false, "list entries by columns");
+Options options = new Options()
+    .addOption("a", "all", false, "do not hide entries starting with .")
+    .addOption("A", "almost-all", false, "do not list implied . and ..")
+    .addOption("b", "escape", false, "print octal escapes for non-graphic "
+                                     + "characters")
+    .addOption(Option.builder("SIZE").longOpt("block-size")
+                                    .desc("use SIZE-byte blocks")
+                                    .hasArg()
+                                    .build())
+    .addOption("B", "ignore-backups", false, "do not list implied entries "
+                                             + "ending with ~")
+    .addOption("c", false, "with -lt: sort by, and show, ctime (time of last " 
+                           + "modification of file status information) with "
+                           + "-l:show ctime and sort by name otherwise: sort "
+                           + "by ctime")
+    .addOption("C", false, "list entries by columns");
 
 String[] args = new String[]{ "--block-size=10" };
 
@@ -534,7 +531,7 @@ public static void main(String[] args) {
           <li>Date.class - The string value must be a date parsable by <code>new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy")</code></li>
           <li>File.class - The string value is the name of the file.</li>
           <li>Path.class - The string value is the name of a Path.</li>
-          <li>Number.class - The string value is a number representation can can be converted into an Integer or a Double.</li>
+          <li>Number.class - The string value is a number representation can be converted into an Integer or a Double.</li>
           <li>URL.class - The string value is the textual representation of a URL</li>
           <li>FileInputStream.class - The string value is passed to <code>new FileInputStream(s)</code>.</li>
           <li>Long.class - The string value is a valid argument to <code>Long.parseLong()</code>.</li>
