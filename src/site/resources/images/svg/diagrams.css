@@ -55,11 +55,17 @@ rect, line, polygon, polyline {
 	stroke-linecap: round;
 }
 
-.implements, .extends {
+.extends {
 	fill: none;
 	marker-end: url(util.svg#HollowArrow); 
 }
 
-.implements, .note.connect {
+.implements {
+	fill: none;
+	marker-end: url(util.svg#HollowArrow); 
+	stroke-dasharray: 5;
+}
+
+.note.connect {
 	stroke-dasharray: 5;
 }

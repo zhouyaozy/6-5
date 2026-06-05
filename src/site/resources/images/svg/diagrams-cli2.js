@@ -168,17 +168,6 @@ DefaultOptionBuilder.addAttribute("shortPrefix");
 DefaultOptionBuilder.addAttribute("longPrefix");
 DefaultOptionBuilder.addAttribute("burstEnabled");
 
-var DefaultOptionBuilder = new Class("DefaultOptionBuilder");
-DefaultOptionBuilder.addMethod("withId(...)");
-DefaultOptionBuilder.addMethod("withShortName(...)");
-DefaultOptionBuilder.addMethod("withLongName(...)");
-DefaultOptionBuilder.addMethod("withDescription(...)");
-DefaultOptionBuilder.addMethod("withArgument(...)");
-DefaultOptionBuilder.addMethod("withChildren(...)");
-DefaultOptionBuilder.addMethod("withRequired(...)");
-DefaultOptionBuilder.addMethod("create()");
-DefaultOptionBuilder.addMethod("reset()");
-
 var GroupBuilder = new Class("GroupBuilder");
 GroupBuilder.addMethod("withName(...)");
 GroupBuilder.addMethod("withDescription(...)");

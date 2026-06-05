@@ -1,0 +1,77 @@
+diff --git a/DEPLOYMENT.md b/DEPLOYMENT.md
+new file mode 100644
+index 00000000..577d17dc
+--- /dev/null
++++ b/DEPLOYMENT.md
+@@ -0,0 +1,25 @@
++# Deployment Instructions
++
++This document provides instructions for deploying the Apache Commons CLI project.
++
++## Building the Site
++
++To build the project site locally, use the Maven Site plugin:
++
++```bash
++mvn clean site
++```
++
++## Deploying the Site
++
++The project uses the `maven-scm-publish-plugin` to publish the site to the Apache Subversion repository.
++
++To deploy the site, ensure you have the necessary credentials in your `settings.xml` and run:
++
++```bash
++mvn clean site-deploy
++```
++
++## Releasing the Artifacts
++
++To release artifacts, follow the standard Apache Commons release process using the Maven Release plugin.
+diff --git a/src/site/resources/images/svg/diagrams-cli2.js b/src/site/resources/images/svg/diagrams-cli2.js
+index 38efec58..076a12f8 100644
+--- a/src/site/resources/images/svg/diagrams-cli2.js
++++ b/src/site/resources/images/svg/diagrams-cli2.js
+@@ -168,17 +168,6 @@ DefaultOptionBuilder.addAttribute("shortPrefix");
+ DefaultOptionBuilder.addAttribute("longPrefix");
+ DefaultOptionBuilder.addAttribute("burstEnabled");
+ 
+-var DefaultOptionBuilder = new Class("DefaultOptionBuilder");
+-DefaultOptionBuilder.addMethod("withId(...)");
+-DefaultOptionBuilder.addMethod("withShortName(...)");
+-DefaultOptionBuilder.addMethod("withLongName(...)");
+-DefaultOptionBuilder.addMethod("withDescription(...)");
+-DefaultOptionBuilder.addMethod("withArgument(...)");
+-DefaultOptionBuilder.addMethod("withChildren(...)");
+-DefaultOptionBuilder.addMethod("withRequired(...)");
+-DefaultOptionBuilder.addMethod("create()");
+-DefaultOptionBuilder.addMethod("reset()");
+-
+ var GroupBuilder = new Class("GroupBuilder");
+ GroupBuilder.addMethod("withName(...)");
+ GroupBuilder.addMethod("withDescription(...)");
+diff --git a/src/site/resources/images/svg/diagrams.css b/src/site/resources/images/svg/diagrams.css
+index fc1426fb..0ebb411b 100644
+--- a/src/site/resources/images/svg/diagrams.css
++++ b/src/site/resources/images/svg/diagrams.css
+@@ -55,11 +55,17 @@ rect, line, polygon, polyline {
+ 	stroke-linecap: round;
+ }
+ 
+-.implements, .extends {
++.extends {
+ 	fill: none;
+ 	marker-end: url(util.svg#HollowArrow); 
+ }
+ 
+-.implements, .note.connect {
++.implements {
++	fill: none;
++	marker-end: url(util.svg#HollowArrow); 
++	stroke-dasharray: 5;
++}
++
++.note.connect {
+ 	stroke-dasharray: 5;
+ }
