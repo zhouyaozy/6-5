@@ -18,24 +18,35 @@
 package org.apache.commons.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests {@link AlreadySelectedException}.
- */
 class AlreadySelectedExceptionTest {
 
     @Test
-    void testConstructor() {
-        assertEquals("a", new AlreadySelectedException("a").getMessage());
-        assertNull(new AlreadySelectedException("a").getOption());
-        final Option option = new Option("a", "d");
+    void testMessageConstructor() {
+        final AlreadySelectedException exception = new AlreadySelectedException("a");
+
+        assertEquals("a", exception.getMessage());
+        assertNull(exception.getOption());
+        assertNull(exception.getOptionGroup());
+    }
+
+    @Test
+    void testOptionGroupConstructor() throws AlreadySelectedException {
+        final Option selectedOption = new Option("a", "already selected");
+        final Option triggeringOption = new Option("b", "triggering option");
         final OptionGroup optionGroup = new OptionGroup();
-        assertNotNull(new AlreadySelectedException(optionGroup, option).getMessage());
-        assertEquals(option, new AlreadySelectedException(optionGroup, option).getOption());
-        assertEquals(optionGroup, new AlreadySelectedException(optionGroup, option).getOptionGroup());
+        optionGroup.addOption(selectedOption);
+        optionGroup.addOption(triggeringOption);
+        optionGroup.setSelected(selectedOption);
+
+        final AlreadySelectedException exception = new AlreadySelectedException(optionGroup, triggeringOption);
+
+        assertEquals("The option 'b' was specified but an option from this group has already been selected: 'a'", exception.getMessage());
+        assertSame(triggeringOption, exception.getOption());
+        assertSame(optionGroup, exception.getOptionGroup());
     }
 }
