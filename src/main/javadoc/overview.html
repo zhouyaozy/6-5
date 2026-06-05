@@ -17,13 +17,16 @@ limitations under the License.
 <html>
 <head>
 <title>Apache Commons CLI Overview</title>
+<style>
+  .leaf-icon { height: 1em; padding-right: 0.25em; }
+</style>
 </head>
 <body>
   <a href="https://commons.apache.org/cli"> <img src="org/apache/commons/cli/doc-files/logo.png" alt="Apache Commons CLI">
   </a>
     <section id="Introducing">
     <h1>
-      <img src="org/apache/commons/cli/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">1. Introducing Apache Commons CLI
+      <img class="leaf-icon" src="org/apache/commons/cli/doc-files/leaf.svg" alt="leaf">1. Introducing Apache Commons CLI
     </h1>
 
     <p>The Apache Commons CLI component parses command-line arguments for your application.</p>
@@ -120,7 +123,7 @@ limitations under the License.
     </section>
     </section>
     <section id="Using">
-      <h1><img src="org/apache/commons/cli/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">2. Using Apache Commons CLI</h1>
+      <h1><img class="leaf-icon" src="org/apache/commons/cli/doc-files/leaf.svg" alt="leaf">2. Using Apache Commons CLI</h1>
       <p>
         The following sections describe some example scenarios on how to 
         use CLI in applications.
@@ -241,7 +244,7 @@ if(countryCode == null) {
     </section>
 
     <section>
-      <h1><img src="org/apache/commons/cli/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">3. Using Ant as an Example</h1>
+      <h1><img class="leaf-icon" src="org/apache/commons/cli/doc-files/leaf.svg" alt="leaf">3. Using Ant as an Example</h1>
       <p>
         <a href="https://ant.apache.org/">Ant</a> will be used
         here to illustrate how to create the <code>Options</code> required.  The following
@@ -431,7 +434,7 @@ formatter.printHelp("ant", options);</code></pre>
     </section>
 
     <section>
-      <h1><img src="org/apache/commons/cli/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">4. Creating an ls Example</h1>
+      <h1><img class="leaf-icon" src="org/apache/commons/cli/doc-files/leaf.svg" alt="leaf">4. Creating an ls Example</h1>
       <p>
         One of the most widely used command line applications in the *nix world
         is <code>ls</code>. Due to the large number of options required for <code>ls</code> 
@@ -493,7 +496,7 @@ try {
 }     </code></pre>
     </section>
     <section>
-      <h1><img src="org/apache/commons/cli/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">5. Converting (Parsing) Option Values</h1>
+      <h1><img class="leaf-icon" src="org/apache/commons/cli/doc-files/leaf.svg" alt="leaf">5. Converting (Parsing) Option Values</h1>
         <p>
             By in most cases the values on the command line are retrieved as Strings via the 
             <code>commandLine.getOptionValue(key)</code> command.  However, it is possible for
@@ -571,7 +574,7 @@ public static void main(String[] args) {
         </p>
     </section>
     <section>
-      <h1><img src="org/apache/commons/cli/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">6. Deprecating Options</h1>
+      <h1><img class="leaf-icon" src="org/apache/commons/cli/doc-files/leaf.svg" alt="leaf">6. Deprecating Options</h1>
           <p>
               Options may be marked as deprecated using ghe <code>Option.builder.deprecated()</code> method.
               Additional information may be specified by passing a <code>DeprecatedAttributes</code> instance to the
@@ -614,7 +617,7 @@ public static void main(String[] args) {
                   of deprecated options rather than printing them on the standard output.
               </p>
               <p>
-                  for example if <code>doSomething</code> is implemented as:
+                  The default implementation of <code>doSomething</code> produces:
               </p>
               <pre><code>
   void doSomething(Options options) {
@@ -630,7 +633,7 @@ public static void main(String[] args) {
       }
   }           </code></pre>
               <p>
-                  The output of the run would be.
+                  The output of the run would be:
               </p>
 
               <pre><code>
@@ -638,7 +641,7 @@ public static void main(String[] args) {
   n=5         </code></pre>
 
               <p>
-                  for example if <code>doSomething</code> is implemented as:
+                  To redirect the announcement to system err, provide a custom deprecated handler:
               </p>
 
               <pre><code>
@@ -665,32 +668,26 @@ public static void main(String[] args) {
       }
   }           </code></pre>
               <p>
-                  The output of the run would be.
+                  The output would be the same, but the first line would be printed on system err instead of system out:
               </p>
               <code>
   ERROR: Option 'n': Deprecated for removal since now: Use '-count' instead
   n=5         </code>
-              <p>
-                  However, the first line would be printed on system err instead of system out.
-              </p>
 
           </section>
           <section>
             <h2>Changing help format</h2>
-              <p>By default the help formater prints "[Deprecated]" in front of the description for the option.  This can
+              <p>By default the help formatter prints "[Deprecated]" in front of the description for the option.  This can
               be changed to display any values desired.
               </p>
               <p>
-              If <code>doSomething</code> is implemented as:
+              The default help output is:
               </p>
               <pre><code>
   void doSomething(Options options) {
     HelpFormatter formatter = HelpFormatter.builder().get();
     formatter.printHelp("Command line syntax:", options);
   }           </code></pre>
-              <p>
-              To output is
-              </p>
               <pre><code>
   usage: Command line syntax:
   -count &lt;arg&gt;   the number of things
@@ -705,7 +702,7 @@ public static void main(String[] args) {
                       will use the output of the function as the description for the option.</li>
           </ul>
           <p>
-              As an example of the second case above, changing the implementation of <code>doSomething</code> to
+              Using a custom function to change the display:
           </p>
               <pre><code>
   void doSomething(Options options) {
@@ -715,7 +712,7 @@ public static void main(String[] args) {
       formatter.printHelp("Command line syntax:", options);
   }           </code></pre>
               <p>
-              changes the output to
+              changes the output to:
               </p>
               <pre><code>
   usage: Command line syntax:
@@ -725,7 +722,7 @@ public static void main(String[] args) {
       </section>
       </section>
     <section id="Properties">
-      <h1><img src="org/apache/commons/cli/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">7. Defining Option Properties</h1>
+      <h1><img class="leaf-icon" src="org/apache/commons/cli/doc-files/leaf.svg" alt="leaf">7. Defining Option Properties</h1>
       <p>
         The following are the properties that each 
         <a href="javadocs/api-release/org/apache/commons/cli/Option.html">Option</a> has.  All of these
@@ -819,10 +816,11 @@ public static void main(String[] args) {
       </table>
     </section>
   <h1>
-    <img src="org/apache/commons/cli/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">8. Requirements
+    <img class="leaf-icon" src="org/apache/commons/cli/doc-files/leaf.svg" alt="leaf">8. Requirements
   </h1>
   <ul>
     <li>Java 8 or above.</li>
     <li>If using OSGi, R7 or above.</li>
   </ul>
 </body>
+</html>
